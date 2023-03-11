@@ -23,12 +23,13 @@ class Main:
 
         
         while True:
+            #showing
             game.show_background(screen)
+            game.show_moves(screen)
             game.show_pieces(screen)
             
             if dragger.dragging:
                 dragger.update_blit(screen)
-
 
             for event in pygame.event.get():
 
@@ -39,18 +40,26 @@ class Main:
                     clicked_row = dragger.mouseY // SQU_SIZE
                     clicked_col = dragger.mouseX // SQU_SIZE
 
-
                     #if the clicked square contains a piece
                     if board.squares[clicked_row][clicked_col].has_piece():
                         piece = board.squares[clicked_row][clicked_col].piece
+                        board.calculate_moves(piece, clicked_row, clicked_col)
                         dragger.save_initial(event.pos)
                         dragger.drag_piece(piece)
+
+                        game.show_background(screen)
+                        game.show_moves(screen)
+                        game.show_pieces(screen)
+
 
                 #mouse motion
                 elif event.type == pygame.MOUSEMOTION:
                     if dragger.dragging:
                         dragger.update_mouse(event.pos)
+                        #showing
+
                         game.show_background(screen)
+                        game.show_moves(screen)
                         game.show_pieces(screen)
                         dragger.update_blit(screen)
                         
@@ -62,7 +71,6 @@ class Main:
                 elif event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-
 
             pygame.display.update()
 

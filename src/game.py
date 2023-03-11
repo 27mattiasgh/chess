@@ -26,6 +26,8 @@ class Game:
                 pygame.draw.rect(surface, color, rect)
 
     def show_pieces(self, surface):
+
+
         for row in range(ROWS):
             for col in range(COLS):
 
@@ -40,3 +42,25 @@ class Game:
                         img_center = col * SQU_SIZE + SQU_SIZE // 2, row * SQU_SIZE + SQU_SIZE // 2
                         piece.texture_rect = img.get_rect(center=img_center)
                         surface.blit(img, piece.texture_rect)
+
+
+    def show_moves(self, surface):
+
+
+        if self.dragger.dragging:
+            piece = self.dragger.piece
+
+
+
+
+
+
+            for move in piece.moves:
+
+                color = '#C86464'
+                rect = (move.final.col * SQU_SIZE, move.final.row * SQU_SIZE, SQU_SIZE, SQU_SIZE)
+                pygame.draw.rect(surface, color, rect)
+
+
+
+
