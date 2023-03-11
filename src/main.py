@@ -3,7 +3,6 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 import pygame
-import math
 import sys
 
 from const import *
@@ -21,7 +20,6 @@ class Main:
 
         self.game = Game()
   
-
     def mainloop(self):
         screen = self.screen
         game = self.game
@@ -87,7 +85,6 @@ class Main:
                         game.show_last_move(screen)
                         game.show_highlight(screen)
                         game.show_pieces(screen)
-
 
                 #mouse motion
                 elif event.type == pygame.MOUSEMOTION:

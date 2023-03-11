@@ -50,7 +50,7 @@ class Game:
 
             for move in piece.moves:
 
-                color = '#d6d6bd' if (move.final.row + move.final.col) % 2 == 0 else '#6a874d'
+                color = '#C4BFAB' if (move.final.row + move.final.col) % 2 == 0 else '#6a874d'
                 
                 circle_pos = (move.final.col * SQU_SIZE + SQU_SIZE // 2, move.final.row * SQU_SIZE + SQU_SIZE // 2)
                 circle_radius = SQU_SIZE // 8
