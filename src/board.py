@@ -4,17 +4,36 @@ from square import Square
 from move import Move
 
 
-
-
 class Board:
 
     def __init__(self):
         self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range(COLS)]
-
+        self.last_move = None
 
         self.create()
         self.add_pieces('white')
         self.add_pieces('black')
+
+    def move(self, piece, move):
+        initial = move.initial
+        final = move.final
+
+        #console board move update
+        self.squares[initial.row][initial.col].piece = None
+        self.squares[final.row][final.col].piece = piece
+
+        #for pawns
+        piece.moved = True
+
+
+        #clear valid moves
+        piece.clear_moves()
+
+        #set last move
+        self.last_move = move
+
+    def valid_move(self, piece, move):
+        return move in piece.moves
 
     def calculate_moves(self, piece, row ,col):
         '''
@@ -186,7 +205,6 @@ class Board:
             for col in range(COLS):
                 self.squares[row][col] = Square(row, col)
 
-
     def add_pieces(self, color):
         row_pawn, row_other = (6, 7) if color == 'white' else (1, 0)
 
@@ -211,15 +229,3 @@ class Board:
 
         #king
         self.squares[row_other][4] = Square(row_other, 4, King(color))
-
-
-
-
-        
-
-
-
-
-
-
-    

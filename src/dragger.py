@@ -8,8 +8,8 @@ class Dragger:
         self.piece = None
         self.mouseX = 0
         self.mouseY = 0
-        self.inital_row = 0
-        self.inital_col = 0
+        self.initial_row = 0
+        self.initial_col = 0
         self.dragging = False
 
     #blit
@@ -36,12 +36,13 @@ class Dragger:
         self.mouseX, self.mouseY = pos
 
     def save_initial(self, pos):
-        self.inital_row = pos[1] // SQU_SIZE
-        self.inital_col = pos[0] // SQU_SIZE
+        self.initial_row = pos[1] // SQU_SIZE
+        self.initial_col = pos[0] // SQU_SIZE
 
     def drag_piece(self, piece):
         self.piece = piece
         self.dragging = True
+
 
     def undrag_piece(self):
         self.piece = None

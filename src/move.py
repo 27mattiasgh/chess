@@ -5,4 +5,13 @@ class Move:
         self.initial = initial
         self.final = final
         #(squares btw)
+
+    def __str__(self):
+        s= ''
+        s += f'({self.initial.col}, {self.inital.row})'
+        s += f' -> ({self.final.col}, {self.final.row})'
+        return s
+    
+    def __eq__(self, other):
+        return self.initial == other.initial and self.final == other.final
         
