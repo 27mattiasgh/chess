@@ -1,13 +1,13 @@
 from src.computer.computer import Computer
 
-class Pgn:
+class Formatter:
 
     def __init__(self):
         pass
 
-    def rowcol_to_computer(self, initial_row, initial_col, final_row, final_col):
+    def rowcol_to_uci(self, initial_row, initial_col, final_row, final_col):
         """
-        Translates pygame coordinates to acceptable stockfish move values  
+        Formats pygame coordinates into acceptable stockfish move values (uci) 
         """
         key = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
 
@@ -22,10 +22,9 @@ class Pgn:
             
         return initial + final
     
-
-    def computer_to_rowcol(self, move):
+    def uci_to_rowcol(self, move):
         """
-        Translates stockfish move values to pygame coordinates  
+        Formats stockfish move values (uci) into pygame coordinates  
         """        
 
 

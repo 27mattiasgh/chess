@@ -12,7 +12,4 @@ class Computer:
         '''
         #uses stockfish 15.1.3 to calc best move - board fen needed
         stockfish.set_fen_position(fen)
-        return stockfish.get_best_move_time(FIND_TIME)
-    
-
-    
+        return stockfish.get_best_move_time(FIND_TIME) 

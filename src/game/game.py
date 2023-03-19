@@ -4,8 +4,8 @@ from src.game.const import *
 from src.game.board import Board
 from src.game.dragger import Dragger
 
-class Game:
 
+class Game:
     def __init__(self):
         self.next_player = 'white'
         self.hovered_square = None
@@ -16,6 +16,9 @@ class Game:
 
     #show 
     def show_background(self, surface):
+        """
+        Displays the background (squares) for the game.
+        """
         for row in range(ROWS):
             for col in range(COLS):
                 if (row + col) % 2 == 0: 
@@ -28,7 +31,9 @@ class Game:
                 pygame.draw.rect(surface, color, rect)
 
     def show_pieces(self, surface):
-
+        """
+        Displays the pieces for the game.
+        """
         for row in range(ROWS):
             for col in range(COLS):
 
@@ -45,6 +50,9 @@ class Game:
                         surface.blit(img, piece.texture_rect)
 
     def show_moves(self, surface):
+        """
+        Displays (not calculates) the possible moves for the game.
+        """
         if self.dragger.dragging:
             piece = self.dragger.piece
 
@@ -57,6 +65,10 @@ class Game:
                 pygame.draw.circle(surface, color, circle_pos, circle_radius)
     
     def show_last_move(self, surface):
+        """
+        Highlights the last move for the game.
+        """
+
         if self.board.last_move:
             initial = self.board.last_move.initial
             final = self.board.last_move.final
@@ -68,30 +80,47 @@ class Game:
                 pygame.draw.rect(surface, color, rect)
 
     def show_hover(self, surface):
+        """
+        Displays a hover effect for the hovered square.
+        """
         if self.hovered_square:
             color = (160, 160, 160)
             rect = (self.hovered_square.col * SQU_SIZE, self.hovered_square.row * SQU_SIZE, SQU_SIZE, SQU_SIZE)
             pygame.draw.rect(surface, color, rect, width=1)
 
     def show_highlight(self, surface):
-            for square in self.highlighted_squares:
-                color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
-                rect = (square[1] * SQU_SIZE, square[0] * SQU_SIZE, SQU_SIZE, SQU_SIZE)
-                pygame.draw.rect(surface, color, rect)
+        """
+        Displays the highlighted squares for the game.
+        """    
+        for square in self.highlighted_squares:
+            color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
+            rect = (square[1] * SQU_SIZE, square[0] * SQU_SIZE, SQU_SIZE, SQU_SIZE)
+            pygame.draw.rect(surface, color, rect)
     
-
 
     # other 
     def next_turn(self):
+        """
+        Changes the next player.
+        """
         self.next_player = 'white' if self.next_player == 'black' else 'black'
     
     def set_hover(self, row, col):
+        """
+        Sets the hovered square to the given row and col.
+        """
         self.hovered_square = self.board.squares[row][col]
 
     def add_highlight(self, row, col):
+        """
+        Adds a highlight to the given row and col.
+        """
         self.highlighted_squares.append((row, col))
 
     def remove_highlight(self, row, col):
+        """
+        Removes a highlight to the given row and col.
+        """
         self.highlighted_squares.remove((row, col))
 
         
