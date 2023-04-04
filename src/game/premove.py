@@ -4,4 +4,6 @@ class Premove:
         self.moves = []
         self.premove_active = False
 
+    def add_premove(self, fen, move):
+        pass
     

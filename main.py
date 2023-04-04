@@ -10,6 +10,7 @@ from src.game.const import *
 from src.game.game import Game
 from src.game.square import Square
 from src.game.move import Move
+from src.game.premove import Premove
 from src.game.uci_formatter import Formatter
 
 from src.computer.computer import Computer
@@ -28,8 +29,9 @@ class Main:
         pygame.display.set_caption('MatiChess')
 
         self.game = Game()
+        self.premove = Premove()
 
-        self.Formatter = Formatter()
+        self.formatter = Formatter()
         self.computer = Computer()
 
         self.py_chess = chess.Board()
@@ -38,15 +40,13 @@ class Main:
         """
         Calculates, updates and displays the computer's move.
         """
-        #finds the best move in chess standard notation (e.g. a1-a8)
+        
         best_move = self.computer.best_move(self.py_chess.fen())
-
         self.py_chess.push(chess.Move.from_uci(best_move))
 
         print(Fore.YELLOW + best_move, Fore.WHITE + self.py_chess.fen(), Fore.RED + 'COMPUTER')
 
-        #translate the stockfish notation to the pychess notation (returns inital square and final square)
-        initial_row, initial_col, final_row, final_col = self.Formatter.uci_to_rowcol(best_move)
+        initial_row, initial_col, final_row, final_col = self.formatter.uci_to_rowcol(best_move)
 
         #edits Square values
         initial = Square(initial_row, initial_col)
@@ -81,7 +81,8 @@ class Main:
         game = self.game
         board = self.game.board
         dragger = self.game.dragger
-        formatter = self.Formatter
+        formatter = self.formatter
+        premove = self.premove
         py_chess = self.py_chess
 
         while True:
@@ -102,6 +103,32 @@ class Main:
 
             if game.next_player == 'white': #player move
 
+                if premove.moves and len(threading.enumerate()) == 1:
+                    uci_move = premove.moves.pop(0) #remove from premove list
+
+
+                    initial_row, initial_col, final_row, final_col = formatter.uci_to_rowcol(uci_move)
+                    initial = Square(initial_row, initial_col)
+                    final = Square(final_row, final_col)
+                    rowcol_move = Move(initial, final)
+
+                    
+                    initial_square = game.board.squares[rowcol_move.initial.row][rowcol_move.initial.col]
+                    piece = initial_square.piece
+                    board.move(piece, rowcol_move)
+
+                    
+                    py_chess.push(chess.Move.from_uci(uci_move))
+                    
+                    print(Fore.YELLOW + uci_move, Fore.WHITE + py_chess.fen(), Fore.GREEN + 'HUMAN | PREMOVEMENT')
+                    game.next_turn()
+                    self.showing()
+                    continue
+                    
+                    
+
+
+                    
                 if dragger.dragging:
                     dragger.update_blit(screen)
 
@@ -174,14 +201,27 @@ class Main:
 
                             move = Move(initial, final)
 
+                            if threading.active_count() > 1:
+                                if not(dragger.initial_row == released_row and dragger.initial_col == released_col):
+                            
+                                    premove.moves.append(formatter.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col))
+                                    print('PREMOVE ADDED', dragger.initial_row, dragger.initial_col, released_row, released_col)
+                                    dragger.undrag_piece()
+                                    self.showing()
+                                    continue
+
+
+                            # if game.board.valid_move(piece, move):
+                            #     game.board.move(piece, move)
+                            #     game.update_last_move(move)
+                            #     game.next_turn()
+
                             #if is valid move
                             if board.valid_move(dragger.piece, move):
-
                                 board.move(dragger.piece, move)
                                 move = formatter.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
                                 py_chess.push(chess.Move.from_uci(move))
                                 print(Fore.YELLOW + move, Fore.WHITE + py_chess.fen(), Fore.GREEN + 'HUMAN')
-
 
                                 #showing
                                 self.showing()
@@ -199,9 +239,10 @@ class Main:
 
 
             elif game.next_player == 'black': #computer move
-                #engage threading
-                threading.Thread(target=self.computer_process).start()
+                self.t = threading.Thread(target=self.computer_process)
+                self.t.start()
                 game.next_turn()
+
 
             pygame.display.update()
 
