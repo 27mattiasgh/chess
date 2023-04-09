@@ -25,8 +25,8 @@ class Square:
 
     def isempty_or_enemy(self, color):
         return self.is_empty() or self.has_enemy_piece(color)
-
-    #can resive as many args as needed (call be called with class instance))
+ 
+    #can recive as many args as needed (call be called with class instance))
     @staticmethod
     def in_range(*args):
         for arg in args:

@@ -1,0 +1,184 @@
+{
+    "1": {
+        "moves": [
+            {
+                "move_number": 1,
+                "move": "e2e4",
+                "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+                "accuracy": 0,
+                "opening": "King's Pawn Game"
+            },
+            {
+                "move_number": 2,
+                "move": "e7e5",
+                "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+                "accuracy": 0,
+                "opening": "King's Pawn Game"
+            },
+            {
+                "move_number": 3,
+                "move": "g1f3",
+                "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+                "accuracy": 0,
+                "opening": "King's Knight Opening"
+            },
+            {
+                "move_number": 4,
+                "move": "b8c6",
+                "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+                "accuracy": 0,
+                "opening": "King's Knight Opening: Normal Variation"
+            },
+            {
+                "move_number": 5,
+                "move": "d2d4",
+                "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+                "accuracy": 0,
+                "opening": "Scotch Game"
+            },
+            {
+                "move_number": 6,
+                "move": "e5d4",
+                "fen": "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+                "accuracy": 0,
+                "opening": "Scotch Game"
+            },
+            {
+                "move_number": 7,
+                "move": "f3d4",
+                "fen": "r1bqkbnr/pppp1ppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+                "accuracy": 0,
+                "opening": "Scotch Game"
+            },
+            {
+                "move_number": 8,
+                "move": "g8f6",
+                "fen": "r1bqkb1r/pppp1ppp/2n2n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 1 5",
+                "accuracy": 0,
+                "opening": "Scotch Game: Schmidt Variation"
+            },
+            {
+                "move_number": 9,
+                "move": "d4c6",
+                "fen": "r1bqkb1r/pppp1ppp/2N2n2/8/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+                "accuracy": 0,
+                "opening": "Scotch Game: Schmidt Variation"
+            },
+            {
+                "move_number": 10,
+                "move": "b7c6",
+                "fen": "r1bqkb1r/p1pp1ppp/2p2n2/8/4P3/8/PPP2PPP/RNBQKB1R w KQkq - 0 6",
+                "accuracy": 0,
+                "opening": "Scotch Game: Schmidt Variation"
+            },
+            {
+                "move_number": 11,
+                "move": "e4e5",
+                "fen": "r1bqkb1r/p1pp1ppp/2p2n2/4P3/8/8/PPP2PPP/RNBQKB1R b KQkq - 0 6",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 12,
+                "move": "d8e7",
+                "fen": "r1b1kb1r/p1ppqppp/2p2n2/4P3/8/8/PPP2PPP/RNBQKB1R w KQkq - 1 7",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 13,
+                "move": "f6d5",
+                "fen": "r1b1kb1r/p1ppqppp/2p5/3nP3/8/8/PPP1QPPP/RNB1KB1R w KQkq - 3 8",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 14,
+                "move": "b2b3",
+                "fen": "r1b1kb1r/p1ppqppp/2p5/3nP3/8/1P6/P1P1QPPP/RNB1KB1R b KQkq - 0 8",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 15,
+                "move": "e7b4",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/3nP3/1q6/1P6/P1P1QPPP/RNB1KB1R w KQkq - 1 9",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 16,
+                "move": "c1d2",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/3nP3/1q6/1P6/P1PBQPPP/RN2KB1R b KQkq - 2 9",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 17,
+                "move": "b4b6",
+                "fen": "r1b1kb1r/p1pp1ppp/1qp5/3nP3/8/1P6/P1PBQPPP/RN2KB1R w KQkq - 3 10",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 18,
+                "move": "c2c4",
+                "fen": "r1b1kb1r/p1pp1ppp/1qp5/3nP3/2P5/1P6/P2BQPPP/RN2KB1R b KQkq - 0 10",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 19,
+                "move": "b6d4",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/3nP3/2Pq4/1P6/P2BQPPP/RN2KB1R w KQkq - 1 11",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 20,
+                "move": "b1c3",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/3nP3/2Pq4/1PN5/P2BQPPP/R3KB1R b KQkq - 2 11",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 21,
+                "move": "d5c3",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/4P3/2Pq4/1Pn5/P2BQPPP/R3KB1R w KQkq - 0 12",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 22,
+                "move": "d2c3",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/4P3/2Pq4/1PB5/P3QPPP/R3KB1R b KQkq - 0 12",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 23,
+                "move": "d4c3",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/4P3/2P5/1Pq5/P3QPPP/R3KB1R w KQkq - 0 13",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 24,
+                "move": "e2d2",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/4P3/2P5/1Pq5/P2Q1PPP/R3KB1R b KQkq - 1 13",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            },
+            {
+                "move_number": 25,
+                "move": "c3a1",
+                "fen": "r1b1kb1r/p1pp1ppp/2p5/4P3/2P5/1P6/P2Q1PPP/q3KB1R w Kkq - 0 14",
+                "accuracy": 0,
+                "opening": "Scotch Game: Mieses Variation"
+            }
+        ]
+    },
+    "2": {
+        "moves": []
+    }
+}

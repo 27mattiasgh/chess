@@ -1,4 +1,4 @@
-from src.game.const import *
+from src.chess.const import *
 import random
 from stockfish import Stockfish
 from colorama import Fore
@@ -15,25 +15,20 @@ class Computer:
         Returns a uci-style move using stockfish 15.1.3 (ex. 'e2e4')
         '''
 
-        if fen == 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1': #'e2e4
-            return self.book_move(fen)
-
         stockfish.set_fen_position(fen)
         try:
             return stockfish.get_best_move_time(FIND_TIME) 
         except:
             print(Fore.BLUE + "CALCULATIONERROR", Fore.WHITE + "MOVE INVALID")
 
-
-    def book_move(self, fen):
+    def is_valid_move(self, fen, move):
         '''
-        Returns a completely random uci-style legal move. Should only be used for the opening.
+        Checks if the uci-style move is valid (in list of valid moves)
         '''
-
         board = chess.Board(fen)
         legal_moves = [move.uci() for move in board.legal_moves]
-        time.sleep(2) #seem like the computer "thought" of the move
-        return random.choice(legal_moves)
+
+        return True if move in legal_moves else False
     
     
 

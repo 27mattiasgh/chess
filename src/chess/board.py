@@ -1,26 +1,23 @@
-from src.game.const import *
-from src.game.piece import *
-from src.game.square import Square
-from src.game.move import Move
+from src.chess.const import *
+from src.chess.piece import *
+from src.chess.square import Square
+from src.chess.move import Move
+
 
 
 class Board:
-
-    def __init__(self):
-        self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for col in range(COLS)]
-
+    def __init__(self, fen=None):
+        self.squares = [[0, 0, 0, 0, 0, 0, 0, 0] for row in range(ROWS)]
+        
         self.last_move = None
-
         self.create()
-        self.add_pieces('white')
-        self.add_pieces('black')
+        self.add_pieces(fen=fen)
 
     def move(self, piece, move):
         """
         Updates the internal board state (used to display board)
         """
-
-
+        
         initial = move.initial
         final = move.final
 
@@ -29,11 +26,7 @@ class Board:
         self.squares[final.row][final.col].piece = piece
 
         #for pawns
-
-
-
         piece.moved = True
-
 
         #clear valid moves
         piece.clear_moves()
@@ -43,6 +36,7 @@ class Board:
 
     def valid_move(self, piece, move):
         return move in piece.moves
+
 
     def calculate_moves(self, piece, row ,col):
         '''
@@ -213,28 +207,75 @@ class Board:
         for row in range(ROWS):
             for col in range(COLS):
                 self.squares[row][col] = Square(row, col)
+    
+    def add_pieces(self, fen=None):
+        if fen:
+            ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = fen.split()
+            row = 7
+            col = 0
+            empty_squares = 0
 
-    def add_pieces(self, color):
-        row_pawn, row_other = (6, 7) if color == 'white' else (1, 0)
+            for rank_str in ranks.split('/'):
+                for char in rank_str:
+                    if char.isdigit():
+                        num_empty_squares = int(char)
+                        empty_squares += num_empty_squares
+                        col += num_empty_squares
+                    else:
+                        if char == 'p':
+                            piece = Pawn('black')
+                        elif char == 'P':
+                            piece = Pawn('white')
+                        elif char == 'n':
+                            piece = Knight('black')
+                        elif char == 'N':
+                            piece = Knight('white')
+                        elif char == 'b':
+                            piece = Bishop('black')
+                        elif char == 'B':
+                            piece = Bishop('white')
+                        elif char == 'r':
+                            piece = Rook('black')
+                        elif char == 'R':
+                            piece = Rook('white')
+                        elif char == 'q':
+                            piece = Queen('black')
+                        elif char == 'Q':
+                            piece = Queen('white')
+                        elif char == 'k':
+                            piece = King('black')
+                        elif char == 'K':
+                            piece = King('white')
 
-        #pawns 
-        for col in range(COLS):
-            self.squares[row_pawn][col] = Square(row_pawn, col, Pawn(color))
-       
-        #knights
-        self.squares[row_other][1] = Square(row_other, 1, Knight(color))
-        self.squares[row_other][6] = Square(row_other, 6, Knight(color))
+                        self.squares[7- row][col] = Square(7 - row, col, piece)
+                        col += 1
+                row -= 1
+                col = 0
+                   
+        else:
+            for color in ('white', 'black'):
+                row_pawn, row_other = (6, 7) if color == 'white' else (1, 0)
 
-        #bishops
-        self.squares[row_other][2] = Square(row_other, 2, Bishop(color))
-        self.squares[row_other][5] = Square(row_other, 5, Bishop(color))
+                #pawns 
+                for col in range(COLS):
+                    self.squares[row_pawn][col] = Square(row_pawn, col, Pawn(color))
 
-        #rooks
-        self.squares[row_other][0] = Square(row_other, 0, Rook(color))
-        self.squares[row_other][7] = Square(row_other, 7, Rook(color))
+                #knights
+                self.squares[row_other][1] = Square(row_other, 1, Knight(color))
+                self.squares[row_other][6] = Square(row_other, 6, Knight(color))
 
-        #queen
-        self.squares[row_other][3] = Square(row_other, 3, Queen(color))
+                #bishops
+                self.squares[row_other][2] = Square(row_other, 2, Bishop(color))
+                self.squares[row_other][5] = Square(row_other, 5, Bishop(color))
 
-        #king
-        self.squares[row_other][4] = Square(row_other, 4, King(color))
+                #rooks
+                self.squares[row_other][0] = Square(row_other, 0, Rook(color))
+                self.squares[row_other][7] = Square(row_other, 7, Rook(color))
+
+                #queen
+                self.squares[row_other][3] = Square(row_other, 3, Queen(color))
+
+                #king
+                self.squares[row_other][4] = Square(row_other, 4, King(color))
+
+

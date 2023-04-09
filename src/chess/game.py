@@ -1,19 +1,27 @@
 import pygame
 
-from src.game.const import *
-from src.game.board import Board
-from src.game.dragger import Dragger
+from src.chess.const import *
+from src.chess.dragger import Dragger
 
 
 class Game:
     def __init__(self):
-        self.next_player = 'white'
+        self.mode = 'puzzles'
+        self.next_color = 'white'
+
+        self.next_player = 'human'
+        self.next_puzzle_player = 'computer'
+
         self.hovered_square = None
         self.highlighted_squares = []
-        self.board = Board()
-        self.dragger = Dragger()
-         
 
+
+        
+         
+    def setup(self, fen=None):
+        from src.chess.board import Board
+        self.board = Board(fen)
+        self.dragger = Dragger()
     #show 
     def show_background(self, surface):
         """
@@ -29,6 +37,8 @@ class Game:
                 rect = (col * SQU_SIZE, row * SQU_SIZE, SQU_SIZE, SQU_SIZE)
 
                 pygame.draw.rect(surface, color, rect)
+
+        pygame.draw.rect(surface, (128, 128, 128), pygame.Rect(800, 0, WINDOW_WIDTH-WIDTH, WINDOW_HEIGHT))
 
     def show_pieces(self, surface):
         """
@@ -93,37 +103,67 @@ class Game:
         Displays the highlighted squares for the game.
         """    
         for square in self.highlighted_squares:
-            color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
+            #darker goes first, then lighter
+            if square[2] == 'highlight':
+                color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
+            if square[2] == 'premove':
+                color = '#72bdda' if (square[0] + square[1]) % 2 == 0 else '#5aabc1'
+            if square[2] == 'puzzle_correct':
+                color = '#92ae79' if (square[0] + square[1]) % 2 == 0 else '#a0b88a'
+            if square[2] == 'puzzle_incorrect':
+                color = '#ff8a80' if (square[0] + square[1]) % 2 == 0 else '#ff7f7f'
+
             rect = (square[1] * SQU_SIZE, square[0] * SQU_SIZE, SQU_SIZE, SQU_SIZE)
             pygame.draw.rect(surface, color, rect)
-    
-
+        
     # other 
-    def next_turn(self):
+
+
+    def next_color_turn(self):
+        """
+        Changes the next color.
+        """
+        self.next_color = 'white' if self.next_color == 'black' else 'black'
+
+
+    def next_computer_turn(self):
         """
         Changes the next player.
         """
-        self.next_player = 'white' if self.next_player == 'black' else 'black'
-    
+        self.next_player = 'human' if self.next_player == 'computer' else 'computer'
+
+    def next_puzzle_turn(self):
+        """
+        Changes the next puzzle player.
+        """
+        self.next_puzzle_player = 'computer' if self.next_puzzle_player == 'human' else 'human'
+
+
+
     def set_hover(self, row, col):
         """
         Sets the hovered square to the given row and col.
         """
-        self.hovered_square = self.board.squares[row][col]
+        try:
+            self.hovered_square = self.board.squares[row][col]
+        except:
+            pass
 
-    def add_highlight(self, row, col):
+    def add_highlight(self, row, col, style):
         """
         Adds a highlight to the given row and col.
         """
-        self.highlighted_squares.append((row, col))
+        self.highlighted_squares.append((row, col, style))
 
-    def remove_highlight(self, row, col):
+    def remove_highlight(self, row, col, style):
         """
         Removes a highlight to the given row and col.
         """
-        self.highlighted_squares.remove((row, col))
+        self.highlighted_squares.remove((row, col, style))
 
-        
+
+
+
 
 
 
