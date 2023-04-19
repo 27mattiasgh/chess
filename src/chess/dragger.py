@@ -1,5 +1,4 @@
 import pygame
-
 from src.chess.const import *
 
 class Dragger:
@@ -24,16 +23,14 @@ class Dragger:
 
         #loading image
         img = pygame.image.load(texture)
-        img_center = (self.mouseX, self.mouseY)
+        img_center = (self.mouseX, self.mouseY + (WINDOW_HEIGHT-HEIGHT)//2)
         self.piece.texture_rect = img.get_rect(center = img_center)
 
         #blitting image
         surface.blit(img, self.piece.texture_rect)
 
 
-
     #other
-
     def update_mouse(self, pos):
         """
         Updates the mouse position.
@@ -61,10 +58,5 @@ class Dragger:
         """
         self.piece = None
         self.dragging = False
-
-
-
-
-
 
 

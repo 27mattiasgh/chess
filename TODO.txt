@@ -1,0 +1,30 @@
+- make timer appear in specific color, using a rounded rect
+    -add clock animation from chess.com
+
+
+- implement config json file - make it editable by user
+    -Background color, light/dark square color, highlight/premove/last move color
+
+
+- make username and photo appear
+
+- add sounds
+
+- add score advantage (+5, up a rook), and scoring in general
+
+- fix puzzles bug where if incorrect, the piece disepears (this is because the moved piece overwrites the piece there, but then it suddenly goes back, setting the piece to blank)
+
+- fix castling
+
+- add multiplayer
+    - send credentials (photo, username) and game starter (black, white)
+
+- ADD CHAT
+
+- make it so black players have the pieces closest to them
+
+- add homescreen
+
+- add settings menu
+
+- make it look good

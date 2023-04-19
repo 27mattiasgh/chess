@@ -1,9 +1,12 @@
-from src.chess.const import *
 import random
-from stockfish import Stockfish
-from colorama import Fore
-import chess
 import time
+
+from colorama import Fore
+from stockfish import Stockfish
+
+import chess
+from src.chess.const import *
+
 stockfish = Stockfish(path=r"src\computer\engine.exe")
 
 class Computer:

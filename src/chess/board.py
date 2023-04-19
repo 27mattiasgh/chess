@@ -37,7 +37,6 @@ class Board:
     def valid_move(self, piece, move):
         return move in piece.moves
 
-
     def calculate_moves(self, piece, row ,col):
         '''
         Calculates all possible/valid moves for a specific piece on a specific square
@@ -47,9 +46,13 @@ class Board:
             steps = 1 if piece.moved else 2
             #vertical moves
             #it appears that the square is too far, but is 0 inclusive
+
             start = row + piece.direction
             end = row + (piece.direction * (1 + steps))
+
+
             for possible_move_row in range(start, end, piece.direction):
+
                 if Square.in_range(possible_move_row):
                     if self.squares[possible_move_row][col].is_empty():
                         #create inital/final move squares
@@ -61,8 +64,10 @@ class Board:
                         piece.add_move(move)
                     #blocked from moving to either squ
                     else:break
+
                 #not in range
                 else:break
+
 
             #diagonal moves
             possible_move_row = row + piece.direction
@@ -277,5 +282,4 @@ class Board:
 
                 #king
                 self.squares[row_other][4] = Square(row_other, 4, King(color))
-
-
+                
