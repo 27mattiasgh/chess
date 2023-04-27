@@ -8,8 +8,6 @@
 
 - make username and photo appear
 
-- add sounds
-
 - add score advantage (+5, up a rook), and scoring in general
 
 - fix puzzles bug where if incorrect, the piece disepears (this is because the moved piece overwrites the piece there, but then it suddenly goes back, setting the piece to blank)

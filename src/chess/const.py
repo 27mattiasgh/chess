@@ -10,10 +10,11 @@ ROWS = 8
 COLS = 8
 
 #squares
-SQU_SIZE = WIDTH // COLS
+SQUARE_SIZE = (WIDTH // COLS) 
+SCALE_RATE = 100
 
 #engine settings
-FIND_TIME = 600 #milliseconds
+FIND_TIME = 650 #milliseconds
 THREADS = 4 # < number of logical processors
 HASH = 1024 #amount of allowed memory stockfish can use 
 

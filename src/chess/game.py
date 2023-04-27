@@ -1,20 +1,31 @@
 import pygame
+import pygame.freetype
 
 from src.chess.const import *
 from src.chess.dragger import Dragger
+import sys
 
 class Game:
     def __init__(self):
-        self.mode = 'puzzles'
-        self.next_color = 'white'
+        self.mode = None
 
-        self.next_player = 'human'
-        self.next_puzzle_player = 'computer'
+
+
+        self.own_color = None
+        self.current_color = None
+        self.puzzle_correct = None
+
+
+
 
         self.hovered_square = None
 
         self.highlighted_squares = []
         self.premoves = []
+
+
+
+        
 
 
       
@@ -36,7 +47,7 @@ class Game:
                     color = (119, 154, 88) #dark green
 
                 #
-                rect = (col * SQU_SIZE, row * SQU_SIZE+((WINDOW_HEIGHT-HEIGHT)/2), SQU_SIZE, SQU_SIZE)
+                rect = (col * SQUARE_SIZE, row * SQUARE_SIZE+((WINDOW_HEIGHT-HEIGHT)//2), SQUARE_SIZE, SQUARE_SIZE)
 
                 pygame.draw.rect(surface, color, rect)
 
@@ -57,7 +68,7 @@ class Game:
                         img = pygame.image.load(piece.texture)
 
                         #
-                        img_center = col * SQU_SIZE + SQU_SIZE // 2, (row * SQU_SIZE + SQU_SIZE // 2) + ((WINDOW_HEIGHT-HEIGHT)/2)
+                        img_center = col * SQUARE_SIZE + SQUARE_SIZE // 2, (row * SQUARE_SIZE + SQUARE_SIZE//2) + ((WINDOW_HEIGHT-HEIGHT)//2)
                         piece.texture_rect = img.get_rect(center=img_center)
                         surface.blit(img, piece.texture_rect)
 
@@ -70,8 +81,8 @@ class Game:
 
             for move in piece.moves:
                 color = '#C4BFAB' if (move.final.row + move.final.col) % 2 == 0 else '#6a874d'
-                circle_pos = (move.final.col * SQU_SIZE + SQU_SIZE // 2, (move.final.row * SQU_SIZE + SQU_SIZE // 2) + (WINDOW_HEIGHT-HEIGHT)//2)
-                circle_radius = SQU_SIZE // 8
+                circle_pos = (move.final.col * SQUARE_SIZE + SQUARE_SIZE//2, (move.final.row * SQUARE_SIZE + SQUARE_SIZE//2) + (WINDOW_HEIGHT-HEIGHT)//2)
+                circle_radius = SQUARE_SIZE // 8
                 pygame.draw.circle(surface, color, circle_pos, circle_radius)
     
     def show_last_move(self, surface):
@@ -86,7 +97,7 @@ class Game:
             for pos in [initial, final]:
                 # color
                 color = (244, 247, 116) if (pos.row + pos.col) % 2 == 0 else (172, 195, 52)
-                rect = (pos.col * SQU_SIZE, pos.row * SQU_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQU_SIZE, SQU_SIZE)
+                rect = (pos.col * SQUARE_SIZE, pos.row * SQUARE_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQUARE_SIZE, SQUARE_SIZE)
                 pygame.draw.rect(surface, color, rect)
 
     def show_hover(self, surface):
@@ -95,7 +106,7 @@ class Game:
         """
         if self.hovered_square:
             color = (160, 160, 160)
-            rect = (self.hovered_square.col * SQU_SIZE, self.hovered_square.row * SQU_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQU_SIZE, SQU_SIZE)
+            rect = (self.hovered_square.col * SQUARE_SIZE, self.hovered_square.row * SQUARE_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(surface, color, rect, width=1)
 
     def show_highlight(self, surface):
@@ -114,36 +125,68 @@ class Game:
                 color = '#ff8a80' if (square[0] + square[1]) % 2 == 0 else '#ff7f7f'
 
         
-            rect = (square[1] * SQU_SIZE, square[0] * SQU_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQU_SIZE, SQU_SIZE)
+            rect = (square[1] * SQUARE_SIZE, square[0] * SQUARE_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(surface, color, rect)
 
-    def show_timer(self, surface):
-        colors = [(40, 40, 40), (215, 215, 215)]
-        for color in colors:
-            pass
-            #draw timer with color in location
-            
+
+
+    #Showing UI elements
+    def game_ui(self, surface):
+        if self.mode != 'computer': return
+
+        font = pygame.font.Font(None, 28)
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(10, 10, 55, 55), border_radius=10) #Esc Button
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
+
+        resign_surface = font.render("Resign", True, (255, 255, 255))
+        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT+10, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
+        surface.blit(resign_surface, resign_surface_rect)
+
+
+
+
+    def puzzle_ui(self, surface):
+        if self.mode != 'puzzles': return
+
+        font = pygame.font.Font(None, 28)
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(10, 10, 55, 55), border_radius=10) #Esc Button
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
+
+        
+        color_surface = pygame.font.Font(None, 34).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
+        color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
+        color_surface_rect = color_surface.get_rect(center=color_rect.center)
+        surface.blit(color_surface, color_surface_rect)
+        
+        reset_surface = font.render("Hint", True, (255, 255, 255))
+        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT+-50, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
+        surface.blit(reset_surface, reset_surface_rect)
+
+        reset_surface = font.render("Reset", True, (255, 255, 255))
+        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT+10, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
+        surface.blit(reset_surface, reset_surface_rect)
+
+        if self.puzzle_correct:
+            cont_surface = font.render("Next", True, (255, 255, 255))
+            cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT-50, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+            cont_surface_rect = cont_surface.get_rect(center=cont_rect.center)
+            surface.blit(cont_surface, cont_surface_rect)
+
+
+
+
 
 
     # other 
+    def next_turn(self):
+        self.current_color = 'white' if self.current_color == 'black' else 'black'
 
-    def next_color_turn(self):
-        """
-        Changes the next color.
-        """
-        self.next_color = 'white' if self.next_color == 'black' else 'black'
 
-    def next_computer_turn(self):
-        """
-        Changes the next player.
-        """
-        self.next_player = 'human' if self.next_player == 'computer' else 'computer'
 
-    def next_puzzle_turn(self):
-        """
-        Changes the next puzzle player.
-        """
-        self.next_puzzle_player = 'computer' if self.next_puzzle_player == 'human' else 'human'
+
 
     def set_hover(self, row, col):
         """
@@ -186,6 +229,7 @@ class Game:
         """
         Formats stockfish move values (uci) into pygame coordinates  
         """        
+        if not move: sys.exit(1)
         key = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
 
         initial_col = key[move[0]]

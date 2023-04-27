@@ -30,7 +30,6 @@ class Computer:
         '''
         board = chess.Board(fen)
         legal_moves = [move.uci() for move in board.legal_moves]
-
         return True if move in legal_moves else False
     
     

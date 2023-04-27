@@ -5,73 +5,70 @@ import threading
 import time
 
 import pygame
-from colorama import Fore
 from stockfish import Stockfish
 
 import chess
-from src.chess.clock import Clock
+
+from src.chess.home import Home
+
 from src.chess.const import *
 from src.chess.game import Game
 from src.chess.move import Move
+from src.chess.sound import Sound
 from src.chess.square import Square
-from src.computer.analisys import Analisys
+from src.computer.analysis import Analysis
 from src.computer.computer import Computer
 from src.multiplayer.multiplayer import Multiplayer
+
 stockfish = Stockfish(path=r"src\computer\engine.exe", parameters={"Threads": THREADS, "Hash": HASH})
+
 
 class Main:
     def __init__(self):
-
-        print("attempting to load classes...")
-
+        self.home = Home()
         self.game = Game()
-        self.clock = Clock()
-        self.analisys = Analisys()
+        self.sound = Sound()
+        self.Analysis = Analysis()
         self.computer = Computer()
 
+        with open(r'assets\data\puzzles.json', 'r') as json_file:
+            self.puzzle_data = json.load(json_file)
+        
 
-        print("Loading PyGame...")
-        self.mode_computer()
 
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption('MatiChess')
-   
+
+
     def mode_computer(self):
         self.game.setup()
-        self.analisys.new()
-
-        self.clock.reset(110)
-        threading.Thread(name='Clock', target=self.clock.start, daemon=True).start()
-        
-
-        self.game.mode = 'computer'
-        self.game.next_color = 'white'
+        self.Analysis.new()
         self.py_chess = chess.Board()  
 
-    def mode_puzzles(self):
-        with open(r'assets\data\puzzles.json', 'r') as json_file:
-            data = json.load(json_file)
+        self.game.mode = 'computer'
+        self.game.own_color = 'white'
+        self.game.current_color = 'white'
 
-        random_puzzle = random.choice(data)
-        self.moves = random_puzzle["Moves"]
-        print(self.moves)
+    def mode_puzzles(self, reset=False):
         
-        fen = random_puzzle["FEN"]
-        self.game.setup(fen)
+        self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
+        while int(self.random_puzzle['Rating']) < 1000: self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
+
+        self.moves = list(self.random_puzzle["Moves"])
+        print(self.moves, self.random_puzzle["Rating"])
+
+        self.game.setup(self.random_puzzle["FEN"])
+        self.game.highlighted_squares.clear()
+        self.py_chess = chess.Board(fen=self.random_puzzle["FEN"])  
+        ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = self.random_puzzle["FEN"].split()
+
         self.game.mode = 'puzzles'
-        self.game.next_color = 'white'
-        self.next_puzzle_player = 'computer'
-
-        self.py_chess = chess.Board(fen=fen)  
-        ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = random_puzzle["FEN"].split()
-        self.game.next_color = 'white' if active_color == 'w' else 'black'
-
+        self.game.current_color = 'white' if active_color == 'w' else 'black'
+        self.game.own_color = 'white' if self.game.current_color == 'black' else 'black' #set to opposite of current color
+        self.game.puzzle_correct = None
 
     def computer_process(self):
-        """
-        Calculates, updates and displays the computer's move.
-        """
         best_move = self.computer.best_move(self.py_chess.fen())
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(best_move)
 
@@ -84,28 +81,20 @@ class Main:
 
         old_fen = self.py_chess.fen()
         self.game.board.move(piece, move)
-        self.py_chess.push(chess.Move.from_uci(best_move))
 
-        self.analisys.add(old_fen, self.py_chess.fen(), best_move)
+        uci_format = chess.Move.from_uci(best_move)
+        is_capture = self.py_chess.is_capture(uci_format)
 
-        print(self.clock.active)
-        print(self.clock.black)
+        self.py_chess.push(uci_format)
+        self.Analysis.add(old_fen, self.py_chess.fen(), best_move)
+        self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
 
     def computer_puzzle_process(self): 
 
-        if len(self.moves) == 0: 
-            self.showing()
-            self.mode_puzzles()
-            self.game.highlighted_squares.clear()
-            self.showing()
-            self.game.next_puzzle_turn()
-            self.game.next_color_turn()
-
         move = self.moves[0]
+        uci_format = chess.Move.from_uci(move)
+
         self.moves.pop(0)
-        
-        
-        print(Fore.YELLOW + move, Fore.WHITE + self.py_chess.fen(), Fore.RED + 'COMPUTER PUZZLE')
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(move)
 
         time.sleep(0.85)
@@ -113,9 +102,18 @@ class Main:
         final = Square(final_row, final_col)
         move = Move(initial, final)
 
+
+
         initial_square = self.game.board.squares[move.initial.row][move.initial.col]
         piece = initial_square.piece
-        self.game.board.move(piece, move)        
+
+        is_capture = self.py_chess.is_capture(uci_format)
+        self.game.board.move(piece, move)    
+        self.py_chess.push(uci_format)
+        self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate=None)
+
+
+        self.game.puzzle_correct = None  
 
     def incorrect_puzzle(self, piece, initial_row, initial_col, released_row, released_col):
         initial = Square(initial_row, initial_col)
@@ -124,53 +122,17 @@ class Main:
         self.game.board.move(piece, move)
         self.game.add_highlight(initial_row, initial_col, 'puzzle_incorrect')
         self.game.add_highlight(released_row, released_col, 'puzzle_incorrect')
-
-
-        time.sleep(0.15)
-
+        time.sleep(0.2)
         initial = Square(released_row, released_col)
         final = Square(initial_row, initial_col)
         move = Move(initial, final)
         self.game.board.move(piece, move)  
 
-        self.game.remove_highlight(initial_row, initial_col, 'puzzle_incorrect')  
-        self.game.remove_highlight(released_row, released_col, 'puzzle_incorrect') 
-
-
-    def gamestate(self, fen):
-        self.py_chess.set_fen(fen)
-        if self.py_chess.is_stalemate() and self.game.mode == 'computer':
-            print(Fore.MAGENTA + "GAMESTATE", Fore.WHITE + "STALEMATE")
-            pygame.quit()
-            sys.exit()
-
-        if self.py_chess.is_insufficient_material() and self.game.mode == 'computer':
-            print(Fore.MAGENTA + "GAMESTATE", Fore.WHITE + "INSUFFICIENT MATERIAL")
-            pygame.quit()
-            sys.exit()
-
-        if self.py_chess.is_checkmate() and self.game.mode == 'computer':
-            print(Fore.MAGENTA + "GAMESTATE", Fore.WHITE + " CHECKMATE")
-            pygame.quit()
-            sys.exit()
-
-
-        #timeout
-        if self.clock.white <= 0 and self.game.mode == 'computer':
-            print(Fore.MAGENTA + "GAMESTATE", Fore.WHITE + " WHITE TIMEOUT")
-            pygame.quit()
-            sys.exit()
-
-        if self.clock.black <= 0 and self.game.mode == 'computer':
-            print(Fore.MAGENTA + "GAMESTATE", Fore.WHITE + " BLACK TIMEOUT")
-            pygame.quit()
-            sys.exit()     
-
     def showing(self):
         """
         Shows the game.
         """
-        self.screen.fill((128, 128, 128))
+        self.screen.fill((80, 80, 80))
         
         self.game.show_background(self.screen)
         self.game.show_last_move(self.screen)
@@ -179,36 +141,59 @@ class Main:
         self.game.show_pieces(self.screen)
         self.game.show_hover(self.screen)
 
-    def mainloop(self):
-        """
-        Main loop of the game.
-        """
+        self.game.game_ui(self.screen)
+        self.game.puzzle_ui(self.screen)
 
+    def mainloop(self):
         while True:
-            #need to keep inside while loop for board restarts to work
+
+
+            while self.game.mode is None:
+                self.home.show(self.screen)
+
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONUP:
+
+
+                        if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
+                            self.mode_computer()
+
+                        elif pygame.Rect(25, 555, 512, 300).collidepoint(event.pos):
+                            self.mode_puzzles()
+
+
+
+
+
+
+
+                pygame.display.update()
+                
+
+            
+
+
+
+
+
             screen = self.screen
             game = self.game
-            clock = self.clock
             board = self.game.board
             dragger = self.game.dragger
             computer = self.computer
-            analisys = self.analisys
-
+            Analysis = self.Analysis
             py_chess = self.py_chess
-
-            #showing
             self.showing()
-            self.gamestate(py_chess.fen())
 
-            if (game.mode == 'puzzles' and game.next_puzzle_player == 'human') or (game.mode == 'computer' and game.next_player == 'human'):
-                if game.premoves and threading.active_count() == 2:
-                    uci_move = game.premoves.pop(0) #remove from premove list
+            if (game.mode == 'puzzles' and game.current_color == game.own_color) or (game.mode == 'computer' and game.current_color == game.own_color):
+                if len(game.premoves) > 0 and threading.active_count() == 1:
+                    uci_move = game.premoves.pop(0)
+
 
                     if not computer.is_valid_move(py_chess.fen(), uci_move):
                         game.premoves.clear()
                         game.highlighted_squares.clear()
                         continue
-
 
 
                     initial_row, initial_col, final_row, final_col = game.uci_to_rowcol(uci_move)
@@ -219,20 +204,20 @@ class Main:
                     
                     initial_square = game.board.squares[rowcol_move.initial.row][rowcol_move.initial.col]
                     piece = initial_square.piece
-                    board.move(piece, rowcol_move)
-                    
 
-                    
+
+                    is_capture = self.py_chess.is_capture(uci_format)
+                    board.move(piece, rowcol_move)
                     py_chess.push(chess.Move.from_uci(uci_move))
-                    
-                    print(Fore.YELLOW + uci_move, Fore.WHITE + py_chess.fen(), Fore.GREEN + 'HUMAN | PREMOVEMENT')
+                    self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
 
                     game.highlighted_squares.remove((initial_row, initial_col, 'premove'))
                     game.highlighted_squares.remove((final_row, final_col, 'premove'))
 
+
+
                     self.showing()
-                    game.next_computer_turn() 
-                    game.next_puzzle_turn()
+                    game.next_turn()
                     continue
                      
                 if dragger.dragging:
@@ -242,8 +227,8 @@ class Main:
                     #click
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         dragger.update_mouse((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
-                        clicked_row = dragger.mouseY // SQU_SIZE
-                        clicked_col = dragger.mouseX // SQU_SIZE                     
+                        clicked_row = dragger.mouseY // SQUARE_SIZE
+                        clicked_col = dragger.mouseX // SQUARE_SIZE                     
 
                         #LEFT CLICK 
                         if event.button == 1 and clicked_row >= 0 and clicked_col < 8 and clicked_row < 8:
@@ -256,7 +241,7 @@ class Main:
                             if board.squares[clicked_row][clicked_col].has_piece():
 
                                 piece = board.squares[clicked_row][clicked_col].piece
-                                if piece.color == game.next_color:
+                                if piece.color == game.own_color:
                             
                                     board.calculate_moves(piece, clicked_row, clicked_col)            
                                     dragger.save_initial((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
@@ -278,8 +263,8 @@ class Main:
 
                     #mouse motion
                     elif event.type == pygame.MOUSEMOTION and event.pos[1] > (WINDOW_HEIGHT-HEIGHT)//2 and event.pos[1] < WINDOW_HEIGHT - (WINDOW_HEIGHT-HEIGHT)//2:
-                        motion_row = (event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2) // SQU_SIZE
-                        motion_col = event.pos[0] // SQU_SIZE
+                        motion_row = (event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2) // SQUARE_SIZE
+                        motion_col = event.pos[0] // SQUARE_SIZE
 
                         game.set_hover(motion_row, motion_col)
                         if dragger.dragging:
@@ -291,101 +276,111 @@ class Main:
                     #click release
                     elif event.type == pygame.MOUSEBUTTONUP:
 
-
                         if dragger.dragging:
                             dragger.update_mouse((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
 
+                            released_row = dragger.mouseY // SQUARE_SIZE
+                            released_col = dragger.mouseX // SQUARE_SIZE
 
-
-                            released_row = dragger.mouseY // SQU_SIZE
-                            released_col = dragger.mouseX // SQU_SIZE
-
-                            # create possible move
                             initial = Square(dragger.initial_row, dragger.initial_col)
                             final = Square(released_row, released_col)
                             move = Move(initial, final)
-
-
                             #premove
-                            if threading.active_count() > 2: #makes sure you can only add premove during computer thinking time
+                            
+
+                            if threading.active_count() > 1: #adding premoves while computer is thinking
+
                                 if not(dragger.initial_row == released_row and dragger.initial_col == released_col):
                                     game.add_highlight(dragger.initial_row, dragger.initial_col, 'premove')
                                     game.add_highlight(released_row, released_col, 'premove')
-
                                     game.premoves.append(game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col))
-                                    print('PREMOVE ADDED', dragger.initial_row, dragger.initial_col, released_row, released_col)
                                     dragger.undrag_piece()
                                     self.showing()
                                     continue
-
-
-                            #if is valid move
-                            
-                            
+       
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'computer'): 
-                                print('valid move')
                                 board.move(dragger.piece, move)
                                 move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
-
+                                uci_format = chess.Move.from_uci(move)
                                 old_fen = py_chess.fen()
-                                py_chess.push(chess.Move.from_uci(move))
-                                print(Fore.YELLOW + move, Fore.WHITE + py_chess.fen(), Fore.GREEN + 'HUMAN')
-                                threading.Thread(name='Analisys Add Thread', target=analisys.add, args=(old_fen, py_chess.fen(), move)).start()
-                                self.showing()
+                                is_capture = self.py_chess.is_capture(uci_format)
 
-                                game.next_computer_turn() 
-                                clock.swtich(game.next_player)
+
+
+                                py_chess.push(uci_format)
+                                threading.Thread(name='Analysis Add Thread', target=Analysis.add, args=(old_fen, py_chess.fen(), move)).start()
+                                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
+                                self.showing()
+                                game.next_turn() 
 
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'puzzles'):
-                                
                                 if game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) == self.moves[0]:
+                                    uci_format = chess.Move.from_uci(self.moves[0])
                                     self.moves.pop(0)
+
+                                    is_capture = self.py_chess.is_capture(uci_format)
+                                    py_chess.push(uci_format)
 
                                     board.move(dragger.piece, move)
                                     move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
 
                                     
-                                    print(Fore.YELLOW + move, Fore.WHITE + py_chess.fen(), Fore.GREEN + 'HUMAN PUZZLE')
-                                    
                                     game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_correct')
                                     game.add_highlight(released_row, released_col, 'puzzle_correct')
 
 
-                                    self.showing()
-                                    game.next_color_turn() 
-                                    game.next_puzzle_turn()
+                                    self.sound.play(check=py_chess.is_check(), capture=is_capture, mate=None)
 
+                                    self.showing()
+                                    game.next_turn()
 
                                 else:
                                     t = threading.Thread(name='Puzzle Incorrect Thread', target=self.incorrect_puzzle, args=(dragger.piece, dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     t.start()
-                                    
-                        dragger.undrag_piece()
+                                    game.puzzle_correct = False           
+                            dragger.undrag_piece()
+
+
+                        if pygame.Rect(WIDTH + 30, HEIGHT, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
+                            self.mode_puzzles(self.random_puzzle)
+
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 65, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_correct:
+                            self.mode_puzzles()
+
+                        elif pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT).collidepoint(event.pos) and game.mode == 'computer':
+                            print('resign triggered')
+
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 65, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
+                            threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
+                            time.sleep(0.85)
+                            game.next_turn() 
+
+                        elif pygame.Rect(10, 10, 55, 55).collidepoint(event.pos): game.mode = None #Esc button
+
 
                     #quit
                     elif event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
 
-            elif (game.mode == 'computer' and game.next_player == 'computer'):
+            elif(game.mode == 'computer' and game.current_color != game.own_color):
                     self.showing()
                     while threading.active_count() > 2: 
                         time.sleep(0.05)
                         self.showing()
 
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
-                    game.next_computer_turn() 
-                    clock.swtich(game.next_player)
+                    game.next_turn() 
 
-            elif (game.mode == 'puzzles' and game.next_puzzle_player == 'computer'):
+            elif (game.mode == 'puzzles' and game.current_color != game.own_color):
                 if len(self.moves) == 0:
-                    self.computer_puzzle_process()  
+                    game.puzzle_correct = True
                 else:
-                    self.t = threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process)
-                    self.t.start()    
-                    game.next_color_turn()
-                    game.next_puzzle_turn()
-                
+                    threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
+                game.next_turn()
+
+            
+            
             pygame.display.update()
 
 main = Main()

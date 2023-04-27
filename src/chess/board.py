@@ -252,7 +252,11 @@ class Board:
                         elif char == 'K':
                             piece = King('white')
 
-                        self.squares[7- row][col] = Square(7 - row, col, piece)
+                        self.squares[7 - row][col] = Square(7 - row, col, piece)
+
+                        
+
+
                         col += 1
                 row -= 1
                 col = 0

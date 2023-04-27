@@ -18,7 +18,7 @@ stockfish = Stockfish(path=r"src\computer\engine.exe")
 
 
 
-class Analisys:
+class Analysis:
     def __init__(self):
         self.id = 1
 
@@ -27,35 +27,27 @@ class Analisys:
         self.openings_path = r'assets\data\openings.json'
         self.puzzles_path = r'assets\data\puzzles.json'
 
-        self.per_move_analisys = False
-
+        self.per_move_Analysis = False
+#
 
     def analyse(self):
-        with open(self.game_path, 'r+') as f:
-            data = json.load(f)
-
-            # Create a process pool
-            pool = multiprocessing.Pool()
-
-            # Define the function to be mapped to each move in the pool
-            func = self.accuracy
-
-            # Use multiprocessing to parallelize the loop over moves
-            results = pool.map(func, data[str(self.id)]['moves'])
-
-            # Close the pool and wait for all processes to finish
-            pool.close()
-            pool.join()
-
-            f.seek(0)
-            json.dump(data, f, indent=4)
-            f.truncate()
-
-        print('Done!')
+        fen = ['fen1', 'fen2', 'fen3', 'fen4']
+        moves = ['move1', 'move2', 'move3', 'move4']
 
 
+        num_processes = len(moves)
+        pool = multiprocessing.Pool(processes=num_processes)
 
-        #expands on the per-move analysis with longer think time 
+
+        results = pool.starmap(self.accuracy, zip(fen, moves))
+
+
+        accuracies = [result for result in results]
+
+
+        print(accuracies)
+
+
 
 
 
@@ -65,7 +57,8 @@ class Analisys:
         '''
         Calculate the accuracy of the move. 
         '''
-        if self.per_move_analisys or bypass:
+        return 'wow!'
+        if self.per_move_Analysis or bypass:
             board = chess.Board(fen=fen)
             stockfish.set_fen_position(fen)
 
@@ -170,6 +163,7 @@ class Analisys:
         with open(self.game_path, 'w') as f:
             json.dump(data, f, indent=2)
         self.opening(len(game_data['moves']))
-    
-        print('complete!')
 
+
+# x = Analysis()
+# x.analyse()

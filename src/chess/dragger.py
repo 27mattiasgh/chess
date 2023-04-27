@@ -42,8 +42,8 @@ class Dragger:
         """
         Saves the initial mouse position.
         """
-        self.initial_row = pos[1] // SQU_SIZE
-        self.initial_col = pos[0] // SQU_SIZE
+        self.initial_row = pos[1] // SQUARE_SIZE
+        self.initial_col = pos[0] // SQUARE_SIZE
 
     def drag_piece(self, piece):
         """
