@@ -20,6 +20,8 @@ class Square:
 
     def has_enemy_piece(self, color):
         return self.has_piece() and self.piece.color != color
+    
+    
 
     def isempty_or_enemy(self, color):
         return self.is_empty() or self.has_enemy_piece(color)

@@ -53,7 +53,10 @@ class Main:
     def mode_puzzles(self, reset=False):
         
         self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
-        while int(self.random_puzzle['Rating']) < 1000: self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
+
+        while int(self.random_puzzle['Rating']) < 1000: 
+            self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
+
 
         self.moves = list(self.random_puzzle["Moves"])
         print(self.moves, self.random_puzzle["Rating"])
@@ -145,10 +148,12 @@ class Main:
         self.game.puzzle_ui(self.screen)
 
     def mainloop(self):
+
         while True:
 
 
             while self.game.mode is None:
+                self.screen = pygame.display.set_mode((WIDTH - 200, HEIGHT))
                 self.home.show(self.screen)
 
                 for event in pygame.event.get():
@@ -156,9 +161,11 @@ class Main:
 
 
                         if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
+                            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
                             self.mode_computer()
 
                         elif pygame.Rect(25, 555, 512, 300).collidepoint(event.pos):
+                            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
                             self.mode_puzzles()
 
 
