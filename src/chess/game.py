@@ -135,11 +135,10 @@ class Game:
         if self.mode != 'computer': return
 
         font = pygame.font.Font(None, 28)
-        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(10, 10, 55, 55), border_radius=10) #Esc Button
-        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         resign_surface = font.render("Resign", True, (255, 255, 255))
-        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT+10, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
         surface.blit(resign_surface, resign_surface_rect)
 
@@ -150,28 +149,28 @@ class Game:
         if self.mode != 'puzzles': return
 
         font = pygame.font.Font(None, 28)
-        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(10, 10, 55, 55), border_radius=10) #Esc Button
-        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
+        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         
         color_surface = pygame.font.Font(None, 34).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
-        color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
+        color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
         
+
         reset_surface = font.render("Hint", True, (255, 255, 255))
-        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT+-50, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
         surface.blit(reset_surface, reset_surface_rect)
 
         reset_surface = font.render("Reset", True, (255, 255, 255))
-        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT+10, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
         surface.blit(reset_surface, reset_surface_rect)
 
         if self.puzzle_correct:
             cont_surface = font.render("Next", True, (255, 255, 255))
-            cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT-50, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+            cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT- 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
             cont_surface_rect = cont_surface.get_rect(center=cont_rect.center)
             surface.blit(cont_surface, cont_surface_rect)
 

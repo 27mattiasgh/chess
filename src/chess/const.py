@@ -1,9 +1,9 @@
-WINDOW_WIDTH = 1100
-WINDOW_HEIGHT = 950
+WINDOW_WIDTH = 1000
+WINDOW_HEIGHT = 750
 
 #board
-WIDTH = 800
-HEIGHT = 800
+WIDTH = 700
+HEIGHT = 700
 
 #board 
 ROWS = 8
@@ -11,7 +11,7 @@ COLS = 8
 
 #squares
 SQUARE_SIZE = (WIDTH // COLS) 
-SCALE_RATE = 100
+
 
 #engine settings
 FIND_TIME = 650 #milliseconds

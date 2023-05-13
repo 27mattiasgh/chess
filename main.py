@@ -38,6 +38,8 @@ class Main:
 
         pygame.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.clock = pygame.time.Clock()
+
         pygame.display.set_caption('MatiChess')
 
 
@@ -105,8 +107,6 @@ class Main:
         final = Square(final_row, final_col)
         move = Move(initial, final)
 
-
-
         initial_square = self.game.board.squares[move.initial.row][move.initial.col]
         piece = initial_square.piece
 
@@ -114,7 +114,7 @@ class Main:
         self.game.board.move(piece, move)    
         self.py_chess.push(uci_format)
         self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate=None)
-
+        self.game.highlighted_squares.clear()
 
         self.game.puzzle_correct = None  
 
@@ -153,28 +153,22 @@ class Main:
 
 
             while self.game.mode is None:
-                self.screen = pygame.display.set_mode((WIDTH - 200, HEIGHT))
-                self.home.show(self.screen)
+                self.home.home(self.screen)
+                self.clock.tick(60)
 
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONUP:
 
 
                         if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
-                            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
                             self.mode_computer()
 
-                        elif pygame.Rect(25, 555, 512, 300).collidepoint(event.pos):
-                            self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-                            self.mode_puzzles()
 
 
 
 
 
-
-
-                pygame.display.update()
+                pygame.display.flip()
                 
 
             
@@ -348,21 +342,21 @@ class Main:
                             dragger.undrag_piece()
 
 
-                        if pygame.Rect(WIDTH + 30, HEIGHT, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
+                        if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
                             self.mode_puzzles(self.random_puzzle)
 
-                        elif pygame.Rect(WIDTH + 30, HEIGHT - 65, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_correct:
+                        elif pygame.Rect(WIDTH + 30, HEIGHT- 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_correct:
                             self.mode_puzzles()
 
-                        elif pygame.Rect(WIDTH + 15, 75, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT).collidepoint(event.pos) and game.mode == 'computer':
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'computer':
                             print('resign triggered')
 
-                        elif pygame.Rect(WIDTH + 30, HEIGHT - 65, (WINDOW_WIDTH - WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
                             threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                             time.sleep(0.85)
                             game.next_turn() 
 
-                        elif pygame.Rect(10, 10, 55, 55).collidepoint(event.pos): game.mode = None #Esc button
+                        
 
 
                     #quit
