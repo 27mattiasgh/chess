@@ -2,6 +2,7 @@ from src.chess.const import *
 from src.chess.piece import *
 from src.chess.square import Square
 from src.chess.move import Move
+import time
 
 
 
@@ -21,9 +22,13 @@ class Board:
         initial = move.initial
         final = move.final
 
+        
+
         #console board move update
         self.squares[initial.row][initial.col].piece = None
         self.squares[final.row][final.col].piece = piece
+
+
 
         if isinstance(piece, Pawn):
             self.check_promote(piece, final)
@@ -36,6 +41,31 @@ class Board:
 
         #set last move
         self.last_move = move
+
+    def puzzle_move(self, piece, move):
+        """
+        Updates the internal board state (used to display board)
+        """
+        
+        initial = move.initial
+        final = move.final
+
+
+        final_piece = self.squares[final.row][final.col].piece
+        
+        #console board move update
+        self.squares[initial.row][initial.col].piece = None
+        self.squares[final.row][final.col].piece = piece
+        time.sleep(0.2)
+        self.squares[initial.row][initial.col].piece = piece
+        self.squares[final.row][final.col].piece = final_piece
+
+
+        piece.moved = True
+        piece.clear_moves()
+        self.last_move = move
+
+
 
     def valid_move(self, piece, move):
         return move in piece.moves
@@ -262,7 +292,7 @@ class Board:
                         elif char == 'K':
                             piece = King('white')
 
-                        self.squares[7 - row][col] = Square(7 - row, col, piece)
+                        self.squares[7 - row][col] = Square(row, col, piece)
 
                         
 

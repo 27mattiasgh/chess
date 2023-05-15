@@ -26,3 +26,7 @@
 - add settings menu
 
 - make it look good
+
+- BAD COMPUTERS HAVE TO USE THE OTHER STOCKFISH ENGINE 
+
+- make the users name be the window name

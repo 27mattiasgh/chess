@@ -7,7 +7,8 @@ from stockfish import Stockfish
 import chess
 from src.chess.const import *
 
-stockfish = Stockfish(path=r"src\computer\engine.exe")
+try: stockfish = Stockfish(path=r"src\computer\stockfish executables\stockfish_15.1_avx2\stockfish-windows-2022-x86-64-avx2.exe")
+except: stockfish = Stockfish(path=r"src\computer\stockfish executables\stockfish_15.1_popcnt\stockfish-windows-2022-x86-64-modern.exe")
 
 class Computer:
     def __init__(self):
