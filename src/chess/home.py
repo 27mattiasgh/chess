@@ -11,7 +11,7 @@ class Home:
     def home(self, surface):
         surface.blit(self.background, (0, 0))
 
-        font = pygame.font.Font(r"C:\Users\Mati\OneDrive\Desktop\helvetica-neue-55-cdnfonts\HelveticaNeueBold.ttf", 40)
+        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 40)
         reset_surface = font.render(f"Welcome Back {getpass.getuser().split()[0]}!", True, (255, 255, 255))
         surface.blit(reset_surface, (30, 30))
 

@@ -135,7 +135,7 @@ class Game:
     def game_ui(self, surface):
         if self.mode != 'computer': return
 
-        font = pygame.font.Font(r"C:\Users\Mati\OneDrive\Desktop\helvetica-neue-55-cdnfonts\HelveticaNeueBold.ttf", 12)
+        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 12)
         pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         resign_surface = font.render("Resign", True, (255, 255, 255))
@@ -149,11 +149,11 @@ class Game:
     def puzzle_ui(self, surface):
         if self.mode != 'puzzles': return
 
-        font = pygame.font.Font(r"C:\Users\Mati\OneDrive\Desktop\helvetica-neue-55-cdnfonts\HelveticaNeueBold.ttf", 12)
+        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 12)
         pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         
-        color_surface = pygame.font.Font(r"C:\Users\Mati\OneDrive\Desktop\helvetica-neue-55-cdnfonts\HelveticaNeueBold.ttf", 24).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
+        color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 24).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
         color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
