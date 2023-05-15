@@ -5,7 +5,7 @@ import threading
 import time
 
 import pygame
-from stockfish import Stockfish
+
 
 import chess
 
