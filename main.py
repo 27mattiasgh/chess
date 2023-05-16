@@ -2,6 +2,7 @@ import json
 import random
 import sys
 import threading
+import getpass
 import time
 
 import pygame
@@ -87,6 +88,9 @@ class Main:
         self.game.setup(self.random_puzzle["FEN"])
 
 
+
+
+
     def computer_process(self):
         best_move = self.computer.best_move(self.py_chess.fen())
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(best_move)
@@ -158,7 +162,31 @@ class Main:
         self.game.add_highlight(initial_row, initial_col, 'puzzle_incorrect')
         self.game.add_highlight(released_row, released_col, 'puzzle_incorrect')
 
+    
+    def multiplayer_host(self):
+        self.analysis.new()
+        self.py_chess = chess.Board() 
 
+        self.game.mode = 'multiplayer' 
+        self.game.own_color = 'white' 
+        self.game.current_color = 'white'
+        self.multiplayer.setup = True
+
+        self.game.setup()
+        self.multiplayer.host_setup()
+
+
+    def multiplayer_user(self):
+        self.analysis.new()
+        self.py_chess = chess.Board() 
+
+        self.game.mode = 'multiplayer' 
+        self.game.own_color = 'black' 
+        self.game.current_color = 'white'
+        self.multiplayer.setup = True
+
+        self.game.setup()
+        self.multiplayer.user_setup(getpass.getuser().split()[0])
 
 
 
@@ -179,9 +207,7 @@ class Main:
         self.game.puzzle_ui(self.screen)
 
     def mainloop(self):
-
         while True:
-
 
             while self.game.mode is None:
                 self.home.home(self.screen)
@@ -192,7 +218,7 @@ class Main:
 
 
                         if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
-                            self.mode_puzzles()
+                            self.multiplayer_host()
 
 
 
@@ -215,6 +241,7 @@ class Main:
             computer = self.computer
             analysis = self.analysis
             py_chess = self.py_chess
+            multiplayer = self.multiplayer
             self.showing()
 
 
@@ -375,6 +402,30 @@ class Main:
                                 self.showing()
                                 game.next_turn() 
 
+                            elif(board.valid_move(dragger.piece, move) and game.mode == 'multiplayer'): 
+                                board.move(dragger.piece, move)
+
+                                if game.own_color == 'black':
+                                    move = game.rowcol_to_uci(7 - dragger.initial_row, dragger.initial_col, 7 - released_row, released_col) 
+                                else:
+                                    move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) 
+
+
+                                uci_format = chess.Move.from_uci(move)
+                                old_fen = py_chess.fen()
+                                is_capture = self.py_chess.is_capture(uci_format)
+
+
+                                py_chess.push(uci_format)
+                                
+                                multiplayer.send(uci_format)
+
+                                threading.Thread(name='analysis Add Thread', target=analysis.add, args=(old_fen, py_chess.fen(), move)).start()
+                                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
+                                self.showing()
+                                game.next_turn() 
+
+
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'puzzles'):
 
                                 if game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) == self.moves[0] and game.own_color == 'white' or game.rowcol_to_uci(7 - dragger.initial_row, dragger.initial_col, 7 - released_row, released_col) == self.moves[0] and game.own_color == 'black':
@@ -426,8 +477,6 @@ class Main:
                         pygame.quit()
                         sys.exit()
 
-
-
             elif(game.mode == 'computer' and game.current_color != game.own_color):
 
                     self.showing()
@@ -438,17 +487,35 @@ class Main:
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
                     game.next_turn() 
 
-
-                    
-
             elif((game.mode == 'multiplayer' and game.current_color != game.own_color)):
-                if self.multiplayer.setup:
-                    pass
+                thread = threading.Thread(name='Multiplayer Host Actual', target=self.multiplayer.recv)
+                thread.start()
+                thread.join()
 
-                else:
-                    data = threading.Thread(name='Multiplayer Host Actual', target=self.multiplayer.recv).start()  
-                    print('recv donewd')
-                    game.next_turn()
+                data = multiplayer.result_queue.get()
+
+                initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(data)
+                if self.game.own_color == 'black':
+                    initial_row = 7 - initial_row
+                    final_row = 7 - final_row
+
+
+                initial = Square(initial_row, initial_col)
+                final = Square(final_row, final_col)
+                move = Move(initial, final)
+
+                old_fen = self.py_chess.fen()
+                self.game.board.move(piece, move)
+
+                uci_format = chess.Move.from_uci(data)
+                is_capture = self.py_chess.is_capture(uci_format)
+
+                self.py_chess.push(uci_format)
+                self.analysis.add(old_fen, self.py_chess.fen(), data)
+                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
+
+                game.next_turn()
+
 
 
             elif (game.mode == 'puzzles' and game.current_color != game.own_color):
