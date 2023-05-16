@@ -44,24 +44,24 @@ class Main:
 
 
     def mode_computer(self):
-        self.game.setup()
         self.analysis.new()
         self.py_chess = chess.Board()  
 
         self.game.mode = 'computer'
         self.game.own_color = 'white'
         self.game.current_color = 'white'
+        self.game.setup()
 
     def mode_multiplayer(self):
-        self.game.setup()
         self.analysis.new()
         self.py_chess = chess.Board()  
 
         self.game.mode = 'multiplayer'
-        self.game.own_color = 'white'
+        self.game.own_color = 'white' 
         self.game.current_color = 'white'
         self.multiplayer.setup = True
 
+        self.game.setup() #make sure its after so the game initialization values have been set #change
 
     def mode_puzzles(self, reset=False):
         
@@ -74,7 +74,7 @@ class Main:
         self.moves = list(self.random_puzzle["Moves"])
         print(self.moves, self.random_puzzle["Rating"])
 
-        self.game.setup(self.random_puzzle["FEN"])
+        
         self.game.highlighted_squares.clear()
         self.py_chess = chess.Board(fen=self.random_puzzle["FEN"])  
         ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = self.random_puzzle["FEN"].split()
@@ -84,16 +84,27 @@ class Main:
         self.game.own_color = 'white' if self.game.current_color == 'black' else 'black' #set to opposite of current color
         self.game.puzzle_correct = None
 
+        self.game.setup(self.random_puzzle["FEN"])
+
+
     def computer_process(self):
         best_move = self.computer.best_move(self.py_chess.fen())
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(best_move)
+
+        if self.game.own_color == 'black': #changed
+            initial_row = 7 - initial_row
+            final_row = 7 - final_row
+
+
+
 
         initial = Square(initial_row, initial_col)
         final = Square(final_row, final_col)
         move = Move(initial, final)
 
-        initial_square = self.game.board.squares[move.initial.row][move.initial.col]
+        initial_square = self.game.board.squares[move.initial.row][move.initial.col] #changed
         piece = initial_square.piece
+
 
         old_fen = self.py_chess.fen()
         self.game.board.move(piece, move)
@@ -110,8 +121,17 @@ class Main:
         move = self.moves[0]
         uci_format = chess.Move.from_uci(move)
 
+
+
+        
+
         self.moves.pop(0)
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(move)
+
+        if self.game.own_color == 'black': #changed
+            initial_row = 7 - initial_row
+            final_row = 7 - final_row
+
 
         time.sleep(0.85)
         initial = Square(initial_row, initial_col)
@@ -197,7 +217,11 @@ class Main:
             py_chess = self.py_chess
             self.showing()
 
+
+
             if (game.mode == 'puzzles' and game.current_color == game.own_color) or (game.mode == 'computer' and game.current_color == game.own_color) or (game.mode == 'multiplayer' and game.current_color == game.own_color):
+
+
                 if len(game.premoves) > 0 and threading.active_count() == 1:
                     uci_move = game.premoves.pop(0)
 
@@ -209,12 +233,18 @@ class Main:
 
 
                     initial_row, initial_col, final_row, final_col = game.uci_to_rowcol(uci_move)
+
+                    if game.own_color == 'black':
+                        initial_row = 7 - initial_row
+                        final_row = 7 - final_row
+
+
                     initial = Square(initial_row, initial_col)
                     final = Square(final_row, final_col)
                     rowcol_move = Move(initial, final)
-
                     
-                    initial_square = game.board.squares[rowcol_move.initial.row][rowcol_move.initial.col]
+                    initial_square = game.board.squares[rowcol_move.initial.row][rowcol_move.initial.col] 
+
                     piece = initial_square.piece
 
 
@@ -238,10 +268,16 @@ class Main:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         dragger.update_mouse((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
                         clicked_row = dragger.mouseY // SQUARE_SIZE
-                        clicked_col = dragger.mouseX // SQUARE_SIZE                     
+                        clicked_col = dragger.mouseX // SQUARE_SIZE       
+
+                        if game.own_color == 'black':
+                            clicked_row = clicked_row     
+       
 
                         #LEFT CLICK 
                         if event.button == 1 and clicked_row >= 0 and clicked_col < 8 and clicked_row < 8:
+
+
 
                             #clear highlights
                             game.premoves.clear()
@@ -250,10 +286,14 @@ class Main:
                             #if the clicked square contains a piece
                             if board.squares[clicked_row][clicked_col].has_piece():
 
+
                                 piece = board.squares[clicked_row][clicked_col].piece
                                 if piece.color == game.own_color:
+
                             
-                                    board.calculate_moves(piece, clicked_row, clicked_col)            
+                                    board.calculate_moves(py_chess.fen(), clicked_row, clicked_col, piece)   
+
+
                                     dragger.save_initial((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
                                     dragger.drag_piece(piece)
                                     self.showing()
@@ -292,11 +332,15 @@ class Main:
                             released_row = dragger.mouseY // SQUARE_SIZE
                             released_col = dragger.mouseX // SQUARE_SIZE
 
-                            initial = Square(dragger.initial_row, dragger.initial_col)
+
+                            initial = Square(dragger.initial_row, dragger.initial_col) #change?
                             final = Square(released_row, released_col)
+
+
+                            
                             move = Move(initial, final)
                             #premove
-                            
+
 
                             if threading.active_count() > 1: #adding premoves while computer is thinking
 
@@ -307,10 +351,18 @@ class Main:
                                     dragger.undrag_piece()
                                     self.showing()
                                     continue
-       
+                            
+
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'computer'): 
                                 board.move(dragger.piece, move)
-                                move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
+
+                                if game.own_color == 'black':
+                                    move = game.rowcol_to_uci(7 - dragger.initial_row, dragger.initial_col, 7 - released_row, released_col) 
+                                else:
+                                    move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) 
+
+
+
                                 uci_format = chess.Move.from_uci(move)
                                 old_fen = py_chess.fen()
                                 is_capture = self.py_chess.is_capture(uci_format)
@@ -324,7 +376,8 @@ class Main:
                                 game.next_turn() 
 
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'puzzles'):
-                                if game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) == self.moves[0]:
+
+                                if game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) == self.moves[0] and game.own_color == 'white' or game.rowcol_to_uci(7 - dragger.initial_row, dragger.initial_col, 7 - released_row, released_col) == self.moves[0] and game.own_color == 'black':
                                     uci_format = chess.Move.from_uci(self.moves[0])
                                     self.moves.pop(0)
 
@@ -376,6 +429,7 @@ class Main:
 
 
             elif(game.mode == 'computer' and game.current_color != game.own_color):
+
                     self.showing()
                     while threading.active_count() > 2: 
                         time.sleep(0.05)
@@ -383,6 +437,9 @@ class Main:
 
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
                     game.next_turn() 
+
+
+                    
 
             elif((game.mode == 'multiplayer' and game.current_color != game.own_color)):
                 if self.multiplayer.setup:

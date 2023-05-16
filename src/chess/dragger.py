@@ -4,12 +4,16 @@ from src.chess.const import *
 class Dragger:
  
     def __init__(self):
-        self.piece = None
+        self.piece = 'hi'
         self.mouseX = 0
         self.mouseY = 0
         self.initial_row = 0
         self.initial_col = 0
+
         self.dragging = False
+        self.clicking = False
+
+        
 
     #blit
     def update_blit(self, surface):
@@ -45,6 +49,7 @@ class Dragger:
         self.initial_row = pos[1] // SQUARE_SIZE
         self.initial_col = pos[0] // SQUARE_SIZE
 
+
     def drag_piece(self, piece):
         """
         Enables dragging of the piece.
@@ -59,4 +64,17 @@ class Dragger:
         self.piece = None
         self.dragging = False
 
+    def click_piece(self, piece):
+        """
+        Enables dragging of the piece.
+        """
+        self.piece = piece
+        self.clicking = True
+
+    def unclick_piece(self):
+        """
+        Disables dragging of the piece.
+        """
+        self.piece = None
+        self.clicking = False
 

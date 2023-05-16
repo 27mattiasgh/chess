@@ -32,8 +32,10 @@ class Game:
          
     def setup(self, fen=None):
         from src.chess.board import Board
-        self.board = Board(fen)
+        self.board = Board(fen, self.own_color)
         self.dragger = Dragger()
+
+
     #show 
     def show_background(self, surface):
         """
@@ -76,8 +78,9 @@ class Game:
         """
         Displays (not calculates) the possible moves for the game.
         """
-        if self.dragger.dragging:
+        if self.dragger.dragging or self.dragger.clicking:
             piece = self.dragger.piece
+
 
             for move in piece.moves:
                 color = '#c6c6c6' if (move.final.row + move.final.col) % 2 == 0 else '#9a9a9a' #light then dark
@@ -125,6 +128,8 @@ class Game:
             if square[2] == 'puzzle_incorrect':
                 color = '#ff8a80' if (square[0] + square[1]) % 2 == 0 else '#ff7f7f'
 
+            if square[2] == 'selection':
+                color = '#c0cad0' if (square[0] + square[1]) % 2 == 0 else '#a7b1b7' #light then dark
         
             rect = (square[1] * SQUARE_SIZE, square[0] * SQUARE_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(surface, color, rect)
@@ -135,7 +140,7 @@ class Game:
     def game_ui(self, surface):
         if self.mode != 'computer': return
 
-        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 12)
+        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
         pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         resign_surface = font.render("Resign", True, (255, 255, 255))
@@ -145,20 +150,17 @@ class Game:
 
 
 
-
     def puzzle_ui(self, surface):
         if self.mode != 'puzzles': return
 
-        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 12)
+        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
         pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
-        
         color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 24).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
         color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
         
-
         reset_surface = font.render("Hint", True, (255, 255, 255))
         reset_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
@@ -174,6 +176,8 @@ class Game:
             cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
             cont_surface_rect = cont_surface.get_rect(center=cont_rect.center)
             surface.blit(cont_surface, cont_surface_rect)
+
+    
 
 
 

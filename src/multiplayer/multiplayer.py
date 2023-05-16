@@ -49,20 +49,20 @@ class Multiplayer:
         
         
     def host_setup(self):
-            print(s.getsockname()[0], 'ip')
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print(s.getsockname()[0], 'ip')
 
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.bind((str(socket.gethostbyname(socket.gethostname())), 4000))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            print('host actual: waiting for connection')
+        s.bind((str(socket.gethostbyname(socket.gethostname())), 4000))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print('host actual: waiting for connection')
 
-            while True:
-                data, addr = s.recvfrom(1024)
-                print('host actual: connection established, data received: ', data, 'addr: ', addr) 
-                
-                self.set_opponent_ip(addr) #SET address to addr recived
+        while True:
+            data, addr = s.recvfrom(1024)
+            print('host actual: connection established, data received: ', data.decode(), 'addr: ', addr) 
+            
+            self.set_opponent_ip(addr) #SET address to addr recived
 
-                return str(data)
+            return str(data)
 
 
 
