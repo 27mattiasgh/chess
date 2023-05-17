@@ -1,31 +1,29 @@
 import socket
 import netaddr
-from queue import Queue
 
 
 class Multiplayer:
     def __init__(self):
 
-
-        
         self.opponent_ip = None
         self.opponent_username = None
-
         self.setup = True
 
-        self.result_queue = Queue()
+
+        self.new_move = False
+        self.move = None
 
 
 
     #ACTUAL
-    def send(self, move):
-        host = str(socket.gethostbyname(socket.gethostname()))
-        port = 4005
+    def send(self, move: str):
+        print(self.opponent_ip)
+
         server = (self.opponent_ip, 4000)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.bind((host, port))
 
-        x = bytes(str(move), encoding='utf-8') #encodes the move
+        x = bytes(str(move), encoding='utf-8')
+
         while True:
             s.sendto(x, server)
             return
@@ -41,12 +39,12 @@ class Multiplayer:
                 data, addr = s.recvfrom(1024)
                 print('host actual: connection established, data received')
                 data = str(data.decode('utf-8'))
-                self.result_queue.put(data)
-                
+
+                self.move = data
+                self.new_move = True
                 return
 
     
-
     #SETUP
     def user_setup(self, username):
         server_ip = str(netaddr.IPAddress(int(input('Enter code given: '))))
@@ -64,7 +62,7 @@ class Multiplayer:
             s.sendto(x, server)
             return
         
-        
+    
         
     def host_setup(self):
         host = str(socket.gethostbyname(socket.gethostname())) #own ip
@@ -80,11 +78,10 @@ class Multiplayer:
         while True:
             data, addr = s.recvfrom(1024)
             print('connection established; data saved')
-            self.opponent_ip = addr    
+            self.opponent_ip = addr[0]  
             self.opponent_username = str(data.decode('utf-8'))
-
+            print(self.opponent_username)
             return
-
 
 
     def set_opponent_ip(self, code):

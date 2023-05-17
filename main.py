@@ -218,7 +218,7 @@ class Main:
 
 
                         if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
-                            self.multiplayer_host()
+                            self.multiplayer_user()
 
 
 
@@ -243,6 +243,35 @@ class Main:
             py_chess = self.py_chess
             multiplayer = self.multiplayer
             self.showing()
+
+            if(game.mode == 'multiplayer' and game.current_color == game.own_color and multiplayer.new_move):
+                initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(multiplayer.move)
+                if self.game.own_color == 'black':
+                    initial_row = 7 - initial_row
+                    final_row = 7 - final_row
+
+
+                initial = Square(initial_row, initial_col)
+                final = Square(final_row, final_col)
+                move = Move(initial, final)
+
+                old_fen = self.py_chess.fen()
+                
+                initial_square = self.game.board.squares[move.initial.row][move.initial.col] #changed
+                piece = initial_square.piece
+
+                self.game.board.move(piece, move)
+
+                uci_format = chess.Move.from_uci(multiplayer.move)
+                is_capture = self.py_chess.is_capture(uci_format)
+
+                self.py_chess.push(uci_format)
+                self.analysis.add(old_fen, self.py_chess.fen(), multiplayer.move)
+                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
+
+                multiplayer.new_move = False
+                
+
 
 
 
@@ -418,7 +447,7 @@ class Main:
 
                                 py_chess.push(uci_format)
                                 
-                                multiplayer.send(uci_format)
+                                multiplayer.send(move)
 
                                 threading.Thread(name='analysis Add Thread', target=analysis.add, args=(old_fen, py_chess.fen(), move)).start()
                                 self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
@@ -487,36 +516,9 @@ class Main:
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
                     game.next_turn() 
 
-            elif((game.mode == 'multiplayer' and game.current_color != game.own_color)):
-                thread = threading.Thread(name='Multiplayer Host Actual', target=self.multiplayer.recv)
-                thread.start()
-                thread.join()
-
-                data = multiplayer.result_queue.get()
-
-                initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(data)
-                if self.game.own_color == 'black':
-                    initial_row = 7 - initial_row
-                    final_row = 7 - final_row
-
-
-                initial = Square(initial_row, initial_col)
-                final = Square(final_row, final_col)
-                move = Move(initial, final)
-
-                old_fen = self.py_chess.fen()
-                self.game.board.move(piece, move)
-
-                uci_format = chess.Move.from_uci(data)
-                is_capture = self.py_chess.is_capture(uci_format)
-
-                self.py_chess.push(uci_format)
-                self.analysis.add(old_fen, self.py_chess.fen(), data)
-                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
-
+            elif(game.mode == 'multiplayer' and game.current_color != game.own_color):
+                threading.Thread(name='Multiplayer Host Actual', target=self.multiplayer.recv).start()
                 game.next_turn()
-
-
 
             elif (game.mode == 'puzzles' and game.current_color != game.own_color):
                 if len(self.moves) == 0:

@@ -31,7 +31,24 @@ class Board:
         self.squares[initial.row][initial.col].piece = None #changed
         self.squares[final.row][final.col].piece = piece #changed
 
-    
+        print(piece.name)
+
+        print(abs(initial.col - final.col))
+
+        print('\n\n')
+
+        if abs(initial.col - final.col) > 1 and isinstance(piece, King):
+
+            if final.col - initial.col > 0: #short 
+                rook = self.squares[final.row][final.col + 1].piece
+                self.squares[final.row][final.col + 1].piece = None
+                self.squares[final.row][final.col - 1].piece = rook
+
+            else:
+                rook = self.squares[final.row][final.col - 2].piece
+                self.squares[final.row][final.col - 2].piece = None
+                self.squares[final.row][final.col + 1].piece = rook
+
 
         if isinstance(piece, Pawn):
             self.check_promote(piece, final)

@@ -12,21 +12,12 @@
 
 - fix puzzles bug where if incorrect, the piece disepears (this is because the moved piece overwrites the piece there, but then it suddenly goes back, setting the piece to blank)
 
-- fix castling
+
 
 - add multiplayer
     - send credentials (photo, username) and game starter (black, white)
 
-- ADD CHAT
 
-- make it so black players have the pieces closest to them
-
-- add homescreen
 
 - add settings menu
 
-- make it look good
-
-- BAD COMPUTERS HAVE TO USE THE OTHER STOCKFISH ENGINE 
-
-- make the users name be the window name
