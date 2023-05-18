@@ -25,42 +25,19 @@ class Board:
         initial = move.initial
         final = move.final
 
-
-
-        #console board move update
         self.squares[initial.row][initial.col].piece = None #changed
         self.squares[final.row][final.col].piece = piece #changed
-
-        print(piece.name)
-
-        print(abs(initial.col - final.col))
-
-        print('\n\n')
-
-        if abs(initial.col - final.col) > 1 and isinstance(piece, King):
-
-            if final.col - initial.col > 0: #short 
-                rook = self.squares[final.row][final.col + 1].piece
-                self.squares[final.row][final.col + 1].piece = None
-                self.squares[final.row][final.col - 1].piece = rook
-
-            else:
-                rook = self.squares[final.row][final.col - 2].piece
-                self.squares[final.row][final.col - 2].piece = None
-                self.squares[final.row][final.col + 1].piece = rook
-
 
         if isinstance(piece, Pawn):
             self.check_promote(piece, final)
 
-        #for pawns
-        piece.moved = True
+        if abs(initial.col - final.col) > 1 and isinstance(piece, King):
+            self.castling(initial, final)
 
-        #clear valid moves
         piece.clear_moves()
-
-        #set last move
         self.last_move = move
+
+
 
     def puzzle_move(self, piece, move):
         """
@@ -94,6 +71,15 @@ class Board:
         if final.row == 0 or final.row == 7:
             self.squares[final.row][final.col].piece = Queen(piece.color)
 
+    def castling(self, initial, final):
+        if final.col - initial.col > 0: #short 
+            rook = self.squares[final.row][final.col + 1].piece
+            self.squares[final.row][final.col + 1].piece = None
+            self.squares[final.row][final.col - 1].piece = rook
+        else:
+            rook = self.squares[final.row][final.col - 2].piece
+            self.squares[final.row][final.col - 2].piece = None
+            self.squares[final.row][final.col + 1].piece = rook
 
     def calculate_moves(self, fen, initial_row, initial_col, piece):
         board = chess.Board(fen)

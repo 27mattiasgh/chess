@@ -205,6 +205,7 @@ class Main:
 
         self.game.game_ui(self.screen)
         self.game.puzzle_ui(self.screen)
+        self.game.multiplayer_ui(self.screen)
 
     def mainloop(self):
         while True:
@@ -216,9 +217,9 @@ class Main:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONUP:
 
+                        if pygame.Rect(507, 240, 477, 230).collidepoint(event.pos):
+                            self.mode_puzzles()
 
-                        if pygame.Rect(25, 230, 512, 300).collidepoint(event.pos):
-                            self.multiplayer_user()
 
 
 
@@ -227,12 +228,6 @@ class Main:
 
                 pygame.display.flip()
                 
-
-            
-
-
-
-
 
             screen = self.screen
             game = self.game
@@ -271,10 +266,6 @@ class Main:
 
                 multiplayer.new_move = False
                 
-
-
-
-
             if (game.mode == 'puzzles' and game.current_color == game.own_color) or (game.mode == 'computer' and game.current_color == game.own_color) or (game.mode == 'multiplayer' and game.current_color == game.own_color):
 
 
@@ -309,6 +300,9 @@ class Main:
                     py_chess.push(chess.Move.from_uci(uci_move))
                     self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
 
+                    if game.mode == 'multiplayer':
+                        multiplayer.send(uci_move)
+
                     game.highlighted_squares.remove((initial_row, initial_col, 'premove'))
                     game.highlighted_squares.remove((final_row, final_col, 'premove'))
 
@@ -320,7 +314,7 @@ class Main:
                     dragger.update_blit(screen)
 
                 for event in pygame.event.get():
-                    #click
+
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         dragger.update_mouse((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
                         clicked_row = dragger.mouseY // SQUARE_SIZE
@@ -367,7 +361,6 @@ class Main:
                             game.show_highlight(screen)
                             game.show_pieces(screen)
 
-                    #mouse motion
                     elif event.type == pygame.MOUSEMOTION and event.pos[1] > (WINDOW_HEIGHT-HEIGHT)//2 and event.pos[1] < WINDOW_HEIGHT - (WINDOW_HEIGHT-HEIGHT)//2:
                         motion_row = (event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2) // SQUARE_SIZE
                         motion_col = event.pos[0] // SQUARE_SIZE
@@ -379,7 +372,6 @@ class Main:
 
                             dragger.update_blit(screen)
                             
-                    #click release
                     elif event.type == pygame.MOUSEBUTTONUP:
 
                         if dragger.dragging:
@@ -454,7 +446,6 @@ class Main:
                                 self.showing()
                                 game.next_turn() 
 
-
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'puzzles'):
 
                                 if game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col) == self.moves[0] and game.own_color == 'white' or game.rowcol_to_uci(7 - dragger.initial_row, dragger.initial_col, 7 - released_row, released_col) == self.moves[0] and game.own_color == 'black':
@@ -497,9 +488,6 @@ class Main:
                             threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                             time.sleep(0.85)
                             game.next_turn() 
-
-                        
-
 
                     #quit
                     elif event.type == pygame.QUIT:

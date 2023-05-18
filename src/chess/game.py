@@ -5,6 +5,10 @@ from src.chess.const import *
 from src.chess.dragger import Dragger
 import sys
 
+font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
+
+
+
 class Game:
     def __init__(self):
         self.mode = None
@@ -138,12 +142,40 @@ class Game:
 
     #Showing UI elements
     def game_ui(self, surface):
-        if self.mode != 'computer': return
+        if self.mode != 's': return
 
-        font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
+        
         pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
 
         resign_surface = font.render("Resign", True, (255, 255, 255))
+        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
+        surface.blit(resign_surface, resign_surface_rect)
+
+
+
+
+
+
+    def multiplayer_ui(self, surface):
+        if self.mode != 'computer': return
+
+
+        transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
+        pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
+        surface.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
+
+
+
+
+
+
+
+
+
+        resign_surface = font.render("Resign", True, (255, 255, 255))
+
+
         resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
         surface.blit(resign_surface, resign_surface_rect)
@@ -154,7 +186,9 @@ class Game:
         if self.mode != 'puzzles': return
 
         font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
-        pygame.draw.rect(surface, (49, 47, 44), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10) #Main
+        transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
+        pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
+        surface.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
 
         color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 24).render(f"{self.own_color.capitalize()} to Move", True, (255, 255, 255) if self.own_color == 'black' else (49, 46, 43))
         color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
