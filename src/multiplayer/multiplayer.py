@@ -17,7 +17,6 @@ class Multiplayer:
 
     #ACTUAL
     def send(self, move: str):
-        print(self.opponent_ip)
 
         server = (self.opponent_ip, 4000)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,11 +32,9 @@ class Multiplayer:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.bind((str(socket.gethostbyname(socket.gethostname())), 4000))
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            print('host actual: waiting for connection')
 
             while True:
                 data, addr = s.recvfrom(1024)
-                print('host actual: connection established, data received')
                 data = str(data.decode('utf-8'))
 
                 self.move = data
@@ -69,18 +66,15 @@ class Multiplayer:
         port = 4000
         
         
-        print('Code: ', int(netaddr.IPAddress(str(socket.gethostbyname(socket.gethostname())))))
 
 
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.bind((host, port))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print('host setup: waiting for connection')
 
         while True:
             data, addr = s.recvfrom(1024)
-            print('connection established; data saved')
             self.opponent_ip = addr[0]  
             self.opponent_username = str(data.decode('utf-8'))
             print(self.opponent_username)

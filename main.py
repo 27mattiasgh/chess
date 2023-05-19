@@ -279,7 +279,6 @@ class Main:
 
                         #pygame.Rect(268, 260, 209, 85)
                         if pygame.Rect(268, 260, 209, 85).collidepoint(event.pos):
-                            print('clicked!')
                             self.multiplayer_user()
                         if pygame.Rect(268, 365, 209, 85).collidepoint(event.pos):
                             self.multiplayer_host()
@@ -374,6 +373,10 @@ class Main:
                     is_capture = self.py_chess.is_capture(uci_format)
                     board.move(piece, rowcol_move)
                     py_chess.push(chess.Move.from_uci(uci_move))
+
+                    if self.py_chess.is_checkmate():
+                        pass
+
                     self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
 
                     if game.mode == 'multiplayer':

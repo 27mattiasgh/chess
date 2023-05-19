@@ -19,7 +19,6 @@ except: stockfish = Stockfish(path=r"src\computer\stockfish executables\stockfis
 
 
 
-
 class Analysis:
     def __init__(self):
         self.id = 1
@@ -28,27 +27,7 @@ class Analysis:
         self.game_path = r'assets\data\games.json'
         self.openings_path = r'assets\data\openings.json'
         self.puzzles_path = r'assets\data\puzzles.json'
-
         self.per_move_Analysis = False
-#
-
-    def analyse(self):
-        fen = ['fen1', 'fen2', 'fen3', 'fen4']
-        moves = ['move1', 'move2', 'move3', 'move4']
-
-
-        num_processes = len(moves)
-        pool = multiprocessing.Pool(processes=num_processes)
-
-
-        results = pool.starmap(self.accuracy, zip(fen, moves))
-
-
-        accuracies = [result for result in results]
-
-
-        print(accuracies)
-
 
 
 
@@ -59,7 +38,7 @@ class Analysis:
         '''
         Calculate the accuracy of the move. 
         '''
-        return 'wow!'
+
         if self.per_move_Analysis or bypass:
             board = chess.Board(fen=fen)
             stockfish.set_fen_position(fen)
@@ -72,6 +51,7 @@ class Analysis:
                     return round(((legal_moves - i) / legal_moves) * 100, 1)
         return None
 
+
     def opening(self, move_number):
         with open(self.game_path, 'r') as f:
             data = json.load(f)
@@ -79,9 +59,11 @@ class Analysis:
         book_move = False
         opening_name = None
 
+
         for game_id, game_data in data.items():
             if game_id == str(self.id):
                 moves = [move['move'] for move in game_data['moves']]
+
 
                 with open(self.openings_path, 'r') as json_file:
                     openings_data = json.load(json_file)
@@ -167,5 +149,3 @@ class Analysis:
         self.opening(len(game_data['moves']))
 
 
-# x = Analysis()
-# x.analyse()
