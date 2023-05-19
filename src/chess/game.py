@@ -17,7 +17,9 @@ class Game:
 
         self.own_color = None
         self.current_color = None
-        self.puzzle_correct = None
+
+        self.puzzle_correct = True
+        self.puzzle_user_correct = None
 
 
 
@@ -127,7 +129,7 @@ class Game:
                 color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
             if square[2] == 'premove':
                 color = '#72bdda' if (square[0] + square[1]) % 2 == 0 else '#5aabc1'
-            if square[2] == 'puzzle_correct':
+            if square[2] == 'puzzle_user_correct':
                 color = '#92ae79' if (square[0] + square[1]) % 2 == 0 else '#a0b88a'
             if square[2] == 'puzzle_incorrect':
                 color = '#ff8a80' if (square[0] + square[1]) % 2 == 0 else '#ff7f7f'
@@ -205,7 +207,7 @@ class Game:
         reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
         surface.blit(reset_surface, reset_surface_rect)
 
-        if self.puzzle_correct:
+        if self.puzzle_user_correct:
             cont_surface = font.render("Next", True, (255, 255, 255))
             cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
             cont_surface_rect = cont_surface.get_rect(center=cont_rect.center)

@@ -46,8 +46,8 @@ class Multiplayer:
 
     
     #SETUP
-    def user_setup(self, username):
-        server_ip = str(netaddr.IPAddress(int(input('Enter code given: '))))
+    def user_setup(self, username, code):
+        server_ip = str(netaddr.IPAddress(int(code)))
         self.opponent_ip = server_ip
 
         host = str(socket.gethostbyname(socket.gethostname()))
@@ -68,7 +68,10 @@ class Multiplayer:
         host = str(socket.gethostbyname(socket.gethostname())) #own ip
         port = 4000
         
-        print('Code: ', int(netaddr.IPAddress(host)))
+        
+        print('Code: ', int(netaddr.IPAddress(str(socket.gethostbyname(socket.gethostname())))))
+
+
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.bind((host, port))

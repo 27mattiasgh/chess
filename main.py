@@ -4,9 +4,9 @@ import sys
 import threading
 import getpass
 import time
-
+import socket
+import netaddr
 import pygame
-
 
 import chess
 
@@ -20,6 +20,8 @@ from src.chess.square import Square
 from src.computer.analysis import Analysis
 from src.computer.computer import Computer
 from src.multiplayer.multiplayer import Multiplayer
+
+large_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 70)
 
 
 class Main:
@@ -83,7 +85,7 @@ class Main:
         self.game.mode = 'puzzles'
         self.game.current_color = 'white' if active_color == 'w' else 'black'
         self.game.own_color = 'white' if self.game.current_color == 'black' else 'black' #set to opposite of current color
-        self.game.puzzle_correct = None
+        self.game.puzzle_user_correct = None
 
         self.game.setup(self.random_puzzle["FEN"])
 
@@ -151,7 +153,7 @@ class Main:
         self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate=None)
         self.game.highlighted_squares.clear()
 
-        self.game.puzzle_correct = None  
+        self.game.puzzle_user_correct = None  
 
     def incorrect_puzzle(self, piece, initial_row, initial_col, released_row, released_col):
         initial = Square(initial_row, initial_col)
@@ -172,6 +174,18 @@ class Main:
         self.game.current_color = 'white'
         self.multiplayer.setup = True
 
+
+        #SHOW PASSWORD/CODE
+        self.screen.blit(self.background, (0, 0))
+        join_game_text = large_font.render(str(int(netaddr.IPAddress(str(socket.gethostbyname(socket.gethostname()))))), True, (255, 255, 255))
+        text_rect = join_game_text.get_rect()
+        text_rect.center = self.screen.get_rect().center
+        self.screen.blit(join_game_text, text_rect)
+        pygame.display.update()
+
+
+
+
         self.game.setup()
         self.multiplayer.host_setup()
 
@@ -185,8 +199,53 @@ class Main:
         self.game.current_color = 'white'
         self.multiplayer.setup = True
 
+
+        password = "Type Code Given:"
+        
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+                if event.type == pygame.KEYDOWN:
+
+                    if password == "Type Code Given:":
+                        password = ""
+
+                    if event.key == pygame.K_RETURN:
+                        if len(password) == 10:
+                            running = False
+
+                    elif event.key == pygame.K_BACKSPACE:
+                        print(password)
+                        password = password[:-1]
+
+                    elif event.key in [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9]:
+                        if len(password) < 10:
+                            password += str(event.key - pygame.K_0)
+
+
+            self.screen.blit(self.background, (0, 0))
+            password_text = password.replace("", " ")[1:-1] if password != 'Type Code Given:' else password
+            password_rendered = large_font.render(password_text, True, (255, 255, 255))
+            password_rect = password_rendered.get_rect()
+            password_rect.center = self.screen.get_rect().center
+            self.screen.blit(password_rendered, password_rect)
+            pygame.display.update()
+
+        time.sleep(0.3)
+
+        self.screen.blit(self.background, (0, 0))
+        password_rendered = large_font.render('Connecting To Host...', True, (255, 255, 255))
+        password_rect = password_rendered.get_rect()
+        password_rect.center = self.screen.get_rect().center
+        self.screen.blit(password_rendered, password_rect)
+
+        pygame.display.update()
+
         self.game.setup()
-        self.multiplayer.user_setup(getpass.getuser().split()[0])
+        self.multiplayer.user_setup(getpass.getuser().split()[0], password)
 
 
 
@@ -217,10 +276,27 @@ class Main:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONUP:
 
-                        if pygame.Rect(507, 240, 477, 230).collidepoint(event.pos):
+
+                        #pygame.Rect(268, 260, 209, 85)
+                        if pygame.Rect(268, 260, 209, 85).collidepoint(event.pos):
+                            print('clicked!')
+                            self.multiplayer_user()
+                        if pygame.Rect(268, 365, 209, 85).collidepoint(event.pos):
+                            self.multiplayer_host()
+
+
+                        if pygame.Rect(760, 260, 209, 190).collidepoint(event.pos):
+                            self.mode_computer()
+
+
+                        if pygame.Rect(268, 505, 209, 190).collidepoint(event.pos):
                             self.mode_puzzles()
 
 
+                        if pygame.Rect(760, 505, 209, 85).collidepoint(event.pos):
+                            self.mode_analysis()
+                        if pygame.Rect(760, 610, 209, 85).collidepoint(event.pos):
+                            self.mode_training()
 
 
 
@@ -459,8 +535,8 @@ class Main:
                                     move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
 
                                     
-                                    game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_correct')
-                                    game.add_highlight(released_row, released_col, 'puzzle_correct')
+                                    game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_user_correct')
+                                    game.add_highlight(released_row, released_col, 'puzzle_user_correct')
 
 
                                     self.sound.play(check=py_chess.is_check(), capture=is_capture, mate=None)
@@ -471,14 +547,16 @@ class Main:
                                 else:
                                     t = threading.Thread(name='Puzzle Incorrect Thread', target=self.incorrect_puzzle, args=(dragger.piece, dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     t.start()
-                                    game.puzzle_correct = False           
+                                    game.puzzle_user_correct = False           
                             dragger.undrag_piece()
 
 
                         if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
                             self.mode_puzzles(self.random_puzzle)
 
-                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_correct:
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_user_correct:
+
+
                             self.mode_puzzles()
 
                         elif pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'computer':
@@ -486,13 +564,17 @@ class Main:
 
                         elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
                             threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
+                            game.puzzle_correct = False
                             time.sleep(0.85)
-                            game.next_turn() 
+                            game.next_turn()
+
 
                     #quit
                     elif event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
+
+
 
             elif(game.mode == 'computer' and game.current_color != game.own_color):
 
@@ -510,7 +592,7 @@ class Main:
 
             elif (game.mode == 'puzzles' and game.current_color != game.own_color):
                 if len(self.moves) == 0:
-                    game.puzzle_correct = True
+                    game.puzzle_user_correct = True
                 else:
                     threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                 game.next_turn()
