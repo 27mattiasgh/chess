@@ -425,7 +425,12 @@ class Main:
 
                                     dragger.save_initial((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
                                     dragger.drag_piece(piece)
+
+                                    game.add_highlight(clicked_row, clicked_col, 'selection')
+
                                     self.showing()
+
+
 
                         #RIGHT CLICK 
                         elif event.button == 3 and clicked_row >= 0 and clicked_col < 8 and clicked_row < 8:        
@@ -469,7 +474,7 @@ class Main:
                             #premove
 
 
-                            if threading.active_count() > 1: #adding premoves while computer is thinking
+                            if threading.active_count() > 2: #adding premoves while computer is thinking
 
                                 if not(dragger.initial_row == released_row and dragger.initial_col == released_col):
                                     game.add_highlight(dragger.initial_row, dragger.initial_col, 'premove')
@@ -479,6 +484,9 @@ class Main:
                                     self.showing()
                                     continue
                             
+                            elif not (board.valid_move(dragger.piece, move)) and initial != final:
+                                print('not valid')
+                                dragger.undrag_piece()
 
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'computer'): 
                                 board.move(dragger.piece, move)
@@ -494,6 +502,7 @@ class Main:
                                 old_fen = py_chess.fen()
                                 is_capture = self.py_chess.is_capture(uci_format)
 
+                                dragger.undrag_piece()
 
 
                                 py_chess.push(uci_format)
@@ -519,7 +528,7 @@ class Main:
                                 py_chess.push(uci_format)
                                 
                                 multiplayer.send(move)
-
+                                dragger.undrag_piece()
                                 threading.Thread(name='analysis Add Thread', target=analysis.add, args=(old_fen, py_chess.fen(), move)).start()
                                 self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
                                 self.showing()
@@ -541,8 +550,11 @@ class Main:
                                     game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_user_correct')
                                     game.add_highlight(released_row, released_col, 'puzzle_user_correct')
 
+                                    dragger.undrag_piece()
 
                                     self.sound.play(check=py_chess.is_check(), capture=is_capture, mate=None)
+
+                                
 
                                     self.showing()
                                     game.next_turn()
@@ -550,8 +562,9 @@ class Main:
                                 else:
                                     t = threading.Thread(name='Puzzle Incorrect Thread', target=self.incorrect_puzzle, args=(dragger.piece, dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     t.start()
+                                    dragger.undrag_piece()
                                     game.puzzle_user_correct = False           
-                            dragger.undrag_piece()
+                            
 
 
                         if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
