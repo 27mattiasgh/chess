@@ -129,7 +129,7 @@ class Home:
         pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, 209, 85), border_radius=10)
         surface.blit(transparent_surface, (760, 505))
 
-        join_game_text = medium_font.render("Quick Analisys", True, (255, 255, 255))
+        join_game_text = medium_font.render("Analyze Last Game", True, (255, 255, 255))
         text_rect = join_game_text.get_rect()
         text_x = 760 + (209 - text_rect.width) // 2
         text_y = 505 + (85 - text_rect.height) // 2

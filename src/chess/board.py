@@ -17,7 +17,7 @@ class Board:
         
 
 
-    def move(self, piece, move):
+    def move(self, piece, move, fen):
         """
         Updates the internal board state (used to display board)
         """
@@ -29,10 +29,33 @@ class Board:
         self.squares[final.row][final.col].piece = piece #changed
 
         if isinstance(piece, Pawn):
+
+            #PROMOTION  
             self.check_promote(piece, final)
+
+
+            #EN PASSANT
+            board = chess.Board(fen)
+            uci_move = chess.Move.from_uci(self.rowcol_to_uci(initial.row, initial.col, final.row, final.col))
+
+            if board.is_en_passant(uci_move):
+                print('en passant true')
+                self.en_passant(piece, initial, final)
+
+
+
+
 
         if abs(initial.col - final.col) > 1 and isinstance(piece, King):
             self.castling(initial, final)
+
+
+
+
+
+
+
+
 
         piece.clear_moves()
         self.last_move = move
@@ -81,6 +104,15 @@ class Board:
             self.squares[final.row][final.col - 2].piece = None
             self.squares[final.row][final.col + 1].piece = rook
 
+
+    def en_passant(self, piece, initial, final):
+        if piece.color == 'white':
+            self.squares[final.row + 1][final.col].piece = None
+        else:
+            self.squares[final.row - 1][final.col].piece = None
+
+
+
     def calculate_moves(self, fen, initial_row, initial_col, piece):
         board = chess.Board(fen)
 
@@ -91,6 +123,24 @@ class Board:
                 final = Square(row_col[2], row_col[3])
                 move = Move(initial, final)
                 piece.add_move(move)
+
+
+    def rowcol_to_uci(self, initial_row, initial_col, final_row, final_col):
+        """
+        Formats pygame coordinates into acceptable stockfish move values (uci) 
+        """
+        key = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'}
+
+        initial_row = 7 - initial_row
+        final_row = 7 - final_row
+
+        initial_col = key[initial_col]
+        final_col = key[final_col]
+
+        initial = initial_col + str(initial_row + 1)
+        final = final_col + str(final_row + 1)
+            
+        return initial + final
 
 
 

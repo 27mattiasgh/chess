@@ -29,6 +29,9 @@ class Game:
         self.puzzle_correct = True
         self.puzzle_user_correct = None
 
+        self.analysis_current_move = 0
+
+
         self.hovered_square = None
 
         self.highlighted_squares = []
@@ -170,6 +173,30 @@ class Game:
         color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
+
+
+
+    #Showing UI elements
+    def analyzer_ui(self, surface):
+        if self.mode != 'analyzer': return
+
+        
+        transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
+        pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
+        surface.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
+
+        resign_surface = font.render("Resign", True, (255, 255, 255))
+        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+        resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
+        surface.blit(resign_surface, resign_surface_rect)
+
+
+
+
+
+
+
+
 
 
 

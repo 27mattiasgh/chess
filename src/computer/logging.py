@@ -1,7 +1,6 @@
 import time
 import json
 import chess
-import multiprocessing
 from src.chess.const import *
 from stockfish import Stockfish
 
@@ -19,7 +18,13 @@ except: stockfish = Stockfish(path=r"src\computer\stockfish executables\stockfis
 
 
 
-class Analysis:
+
+
+
+
+
+
+class Logging:
     def __init__(self):
         self.id = 1
 
@@ -27,29 +32,7 @@ class Analysis:
         self.game_path = r'assets\data\games.json'
         self.openings_path = r'assets\data\openings.json'
         self.puzzles_path = r'assets\data\puzzles.json'
-        self.per_move_Analysis = False
 
-
-
-
-
-
-    def accuracy(self, fen, move_played, bypass=False):
-        '''
-        Calculate the accuracy of the move. 
-        '''
-
-        if self.per_move_Analysis or bypass:
-            board = chess.Board(fen=fen)
-            stockfish.set_fen_position(fen)
-
-            legal_moves = board.legal_moves.count()
-            top_moves = stockfish.get_top_moves(legal_moves)
-
-            for i, move in enumerate(top_moves):
-                if move_played == move['Move']:
-                    return round(((legal_moves - i) / legal_moves) * 100, 1)
-        return None
 
 
     def opening(self, move_number):
@@ -96,9 +79,6 @@ class Analysis:
             f.truncate()
             json.dump(data, f, indent=4)
 
-
-
-
     def new(self):
         '''
         Starts a new game in the games.json file.
@@ -132,12 +112,9 @@ class Analysis:
                     "new_fen": new_fen,
 
                     "opening": None,
+                    "accuracy": None,
+                    "classification": None,
 
-                    "accuracy": self.accuracy(old_fen, move),
-                    "classification": 'classification',
-
-                    "shallow_evaluation": stockfish.get_best_move_time(EVALUATION_SHALLOW_FIND_TIME),
-                    "deep_evaluation": stockfish.get_best_move_time(EVALUATION_DEEP_FIND_TIME),
                     }
                 
                 game_data['moves'].append(new_move)
@@ -147,5 +124,3 @@ class Analysis:
         with open(self.game_path, 'w') as f:
             json.dump(data, f, indent=2)
         self.opening(len(game_data['moves']))
-
-
