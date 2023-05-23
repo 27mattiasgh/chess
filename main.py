@@ -119,8 +119,8 @@ class Main:
         LINE_COLOR = (255, 255, 255)
         LINE_WIDTH = 4
 
-        x_image = pygame.image.load("x.png")
-        o_image = pygame.image.load("o.png")
+        x_image = pygame.image.load(r"assets\images\tictactoe\x.png")
+        o_image = pygame.image.load(r"assets\images\tictactoe\o.png")
         x_image = pygame.transform.scale(x_image, (CELL_SIZE, CELL_SIZE))
         o_image = pygame.transform.scale(o_image, (CELL_SIZE, CELL_SIZE))
 
@@ -733,10 +733,12 @@ class Main:
 
                 with open(r'assets\data\analyzer.json', 'r') as f: moves = json.load(f)
 
-                game.setup(moves[game.analysis_current_move][0]['FEN'])  # Subtract 1 to adjust for starting from 1
+                game.setup(moves[game.analysis_current_move][0]['FEN']) 
+               
 
 
-                print(game.analysis_current_move, len(moves))
+                
+
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -744,11 +746,61 @@ class Main:
 
 
                     elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT and game.analysis_current_move > -1:  
+                        if event.key == pygame.K_LEFT and game.analysis_current_move > 0:
                             game.analysis_current_move -= 1
+ 
+                            
 
-                        elif event.key == pygame.K_RIGHT and game.analysis_current_move < len(moves): 
+
+                        elif event.key == pygame.K_RIGHT and game.analysis_current_move < len(moves) - 1:
+
+                                print(game.analysis_current_move, len(moves) - 1)
+
+                                game.analysis_current_move += 1
+
+                        
+                        elif event.key == pygame.K_RIGHT and game.analysis_current_move == len(moves) - 1 and  not game.analysis_last_move_found:
+
+                            print('triggered!')
+                            
+
+                            py_chess.set_fen(moves[-1][0]['FEN'])
+
+
+                            py_chess.push_uci(moves[-1][0]['Move'])
+
+                            print(py_chess.fen())
+
+
+                            moves.append([{"Move":moves[-1][0]['Move'], "Best Move": moves[-1][0]['Move'], "Type": "Best Move", "Accuracy": "100%", "FEN": py_chess.fen()}])
+                            with open('assets/data/analyzer.json', 'w') as f: json.dump(moves, f)
                             game.analysis_current_move += 1
+
+                            game.analysis_last_move_found = True
+
+
+                            if self.py_chess.is_checkmate():
+                                #PIECE CHECKMATE PERFORMED WITH
+                                row, col, finalrow, finalcol = game.uci_to_rowcol(moves[-1][0]['Move'])
+                                game.add_highlight(finalrow, finalcol, 'checkmate')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+
 
 
 

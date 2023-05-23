@@ -30,6 +30,7 @@ class Game:
         self.puzzle_user_correct = None
 
         self.analysis_current_move = 0
+        self.analysis_last_move_found = False
 
 
         self.hovered_square = None
@@ -144,7 +145,11 @@ class Game:
 
             if square[2] == 'selection':
                 color = '#c0cad0' if (square[0] + square[1]) % 2 == 0 else '#a7b1b7' #light then dark
+
+            if square[2] == 'checkmate':
+                color = '#e0c141' if (square[0] + square[1]) % 2 == 0 else '#deba26' 
         
+
             rect = (square[1] * SQUARE_SIZE, square[0] * SQUARE_SIZE + (WINDOW_HEIGHT-HEIGHT)//2, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(surface, color, rect)
 

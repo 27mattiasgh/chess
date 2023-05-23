@@ -37,6 +37,7 @@ class Analyzer:
         stockfish = Stockfish(path=self.stockfish_path)
         stockfish.set_fen_position(fen)
         moves = stockfish.get_top_moves(10)
+        
         total_moves = len(moves)
         result = []
         played_move = self.move_list[self.fen_list.index(fen)]
@@ -48,7 +49,7 @@ class Analyzer:
 
 
 
-                result.append({"Move": move['Move'], "Type": self.categorize_move(position, total_moves), "Accuracy": accuracy, "FEN": fen})
+                result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": self.categorize_move(position, total_moves), "Accuracy": accuracy, "FEN": fen})
 
 
                 found_move = True
