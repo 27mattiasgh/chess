@@ -40,7 +40,7 @@ class Main:
         with open(r'assets\data\puzzles.json', 'r') as f: self.puzzle_data = json.load(f)
         
         
-        stockfish_path = "src/computer/stockfish executables/stockfish_15.1_avx2/stockfish-windows-2022-x86-64-avx2.exe"
+        stockfish_path = "src\computer\stockfish executables\stockfish_15.1_popcnt\stockfish-windows-2022-x86-64-modern.exe"
         data_file = "assets/data/games.json"
 
         self.analyzer = Analyzer(stockfish_path, data_file)
@@ -62,7 +62,7 @@ class Main:
         self.py_chess = chess.Board()  
 
         self.game.mode = 'computer'
-        self.game.own_color = 'black'
+        self.game.own_color = 'white'
         self.game.current_color = 'white'
         self.game.setup()
 
@@ -448,7 +448,7 @@ class Main:
             logging = self.logging
             py_chess = self.py_chess
             multiplayer = self.multiplayer
-            self.showing()
+
 
             if(game.mode == 'multiplayer' and game.current_color == game.own_color and multiplayer.new_move): #IF NEW MOVE INCOMING FROM OTHER PLAYER
                 initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(multiplayer.move)
@@ -476,6 +476,7 @@ class Main:
                 self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
 
                 multiplayer.new_move = False
+                self.showing()
                 
             if (game.mode == 'puzzles' and game.current_color == game.own_color) or (game.mode == 'computer' and game.current_color == game.own_color) or (game.mode == 'multiplayer' and game.current_color == game.own_color): #MAIN INTERACTION
 
@@ -584,14 +585,14 @@ class Main:
                     elif event.type == pygame.MOUSEMOTION and event.pos[1] > (WINDOW_HEIGHT-HEIGHT)//2 and event.pos[1] < WINDOW_HEIGHT - (WINDOW_HEIGHT-HEIGHT)//2:
                         motion_row = (event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2) // SQUARE_SIZE
                         motion_col = event.pos[0] // SQUARE_SIZE
-
                         game.set_hover(motion_row, motion_col)
+
                         if dragger.dragging:
                             dragger.update_mouse((event.pos[0], event.pos[1] - (WINDOW_HEIGHT-HEIGHT)//2))
-                            self.showing()
-
                             dragger.update_blit(screen)
                             
+
+
                     elif event.type == pygame.MOUSEBUTTONUP:
 
                         if dragger.dragging:
@@ -617,11 +618,9 @@ class Main:
                                     game.add_highlight(released_row, released_col, 'premove')
                                     game.premoves.append(game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     dragger.undrag_piece()
-                                    self.showing()
                                     continue
                             
                             elif not (board.valid_move(dragger.piece, move)) and initial != final:
-                                print('not valid')
                                 dragger.undrag_piece()
 
                             elif (board.valid_move(dragger.piece, move) and game.mode == 'computer'): 
@@ -692,6 +691,9 @@ class Main:
 
                                 
 
+
+
+
                                     self.showing()
                                     game.next_turn()
 
@@ -699,7 +701,8 @@ class Main:
                                     t = threading.Thread(name='Puzzle Incorrect Thread', target=self.incorrect_puzzle, args=(dragger.piece, dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     t.start()
                                     dragger.undrag_piece()
-                                    game.puzzle_user_correct = False           
+                                    game.puzzle_user_correct = False    
+
                             
 
 
@@ -725,6 +728,8 @@ class Main:
                     elif event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
+                    
+
 
 
 
@@ -733,11 +738,69 @@ class Main:
 
                 with open(r'assets\data\analyzer.json', 'r') as f: moves = json.load(f)
 
-                game.setup(moves[game.analysis_current_move][0]['FEN']) 
-               
-
-
+                self.screen.blit(self.background, (0, 0))
                 
+                self.game.show_background(self.screen)
+                self.game.show_last_move(self.screen)
+                self.game.show_highlight(self.screen)
+                self.game.show_moves(self.screen)
+                self.game.show_pieces(self.screen)
+                self.game.show_hover(self.screen)
+
+
+                game.setup(moves[game.analysis_current_move][0]['FEN']) 
+                transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
+                screen.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
+
+                margin = 10
+                rectangle_width = 205
+                rectangle_x = WIDTH + 30
+
+
+                font_size = 24
+                font_color = pygame.Color('white')
+                font = pygame.font.Font(None, font_size)
+
+
+                text = moves[game.analysis_current_move][0]['Description']
+
+                if text is not None:
+                    print(text)
+                    words = text.split()
+
+
+                    lines = []
+                    current_line = words[0]
+
+                    for word in words[1:]:
+                        if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin:
+                            current_line += ' ' + word
+                        else:
+                            lines.append(current_line)
+                            current_line = word
+
+
+                    lines.append(current_line)
+                    line_height = font.size(lines[0])[1]
+                    text_height = len(lines) * line_height
+
+                    rectangle_height = text_height + 2 * margin + 5
+                    rectangle_y = 200
+                    rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+
+                    text_x = rectangle.centerx - rectangle_width // 2 + margin
+                    text_y = rectangle.centery - text_height // 2 + margin - 10
+
+                    pygame.draw.rect(screen, pygame.Color('grey'), rectangle)
+
+
+
+                    for line in lines:
+                        rendered_text = font.render(line, True, font_color)
+                        screen.blit(rendered_text, (text_x, text_y))
+                        text_y += line_height
+
 
 
                 for event in pygame.event.get():
@@ -748,79 +811,58 @@ class Main:
                     elif event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_LEFT and game.analysis_current_move > 0:
                             game.analysis_current_move -= 1
+                            game.highlighted_squares.clear()
  
                             
 
-
                         elif event.key == pygame.K_RIGHT and game.analysis_current_move < len(moves) - 1:
-
-                                print(game.analysis_current_move, len(moves) - 1)
-
                                 game.analysis_current_move += 1
-
-                        
-                        elif event.key == pygame.K_RIGHT and game.analysis_current_move == len(moves) - 1 and  not game.analysis_last_move_found:
-
-                            print('triggered!')
-                            
-
-                            py_chess.set_fen(moves[-1][0]['FEN'])
-
-
-                            py_chess.push_uci(moves[-1][0]['Move'])
-
-                            print(py_chess.fen())
-
-
-                            moves.append([{"Move":moves[-1][0]['Move'], "Best Move": moves[-1][0]['Move'], "Type": "Best Move", "Accuracy": "100%", "FEN": py_chess.fen()}])
-                            with open('assets/data/analyzer.json', 'w') as f: json.dump(moves, f)
-                            game.analysis_current_move += 1
-
-                            game.analysis_last_move_found = True
-
-
-                            if self.py_chess.is_checkmate():
-                                #PIECE CHECKMATE PERFORMED WITH
-                                row, col, finalrow, finalcol = game.uci_to_rowcol(moves[-1][0]['Move'])
-                                game.add_highlight(finalrow, finalcol, 'checkmate')
-
-
-
-
-
-
-
-
-
-
-
-
+                                game.highlighted_squares.clear()
 
 
 
 
                         
+                        # elif event.key == pygame.K_RIGHT and game.analysis_current_move == len(moves) - 1 and not game.analysis_last_move_found:
+
+                        #     py_chess.set_fen(moves[-1][0]['FEN'])
+                        #     py_chess.push_uci(moves[-1][0]['Move'])
 
 
+                        #     moves.append([{"Move":moves[-1][0]['Move'], "Best Move": moves[-1][0]['Move'], "Type": "Best Move", "Description": "And thats checkmate. Great Game!", "Accuracy": "100%", "FEN": py_chess.fen()}])
+                        #     with open('assets/data/analyzer.json', 'w') as f: json.dump(moves, f)
 
+                        #     game.analysis_current_move += 1
+                        #     game.analysis_last_move_found = True
 
+                        #     if self.py_chess.is_checkmate():
+                        #         row, col, finalrow, finalcol = game.uci_to_rowcol(moves[-1][0]['Move'])
+                        #         game.add_highlight(finalrow, finalcol, 'checkmate')
 
+                        #         checkmate_color = 'black' if py_chess.turn else 'white'
 
+                        #         if checkmate_color == 'white':
+                        #             initial_row, initial_col, final_row, final_col = game.uci_to_rowcol('a1' + chess.square_name(py_chess.king(chess.BLACK)))
+                        #             game.add_highlight(final_row, final_col, 'highlight')
 
+                        #         else:
+                        #             initial_row, initial_col, final_row, final_col = game.uci_to_rowcol('a1' + chess.square_name(py_chess.king(chess.WHITE)))
+                        #             game.add_highlight(finalrow, final_col, 'highlight')
 
-            elif(game.mode == 'computer' and game.current_color != game.own_color): #COMPUTER MOVING
+            elif(game.mode == 'computer' and game.current_color != game.own_color):
 
                     self.showing()
                     while threading.active_count() > 2: 
                         time.sleep(0.05)
-                        self.showing()
 
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
                     game.next_turn() 
+                    self.showing()
 
             elif(game.mode == 'multiplayer' and game.current_color != game.own_color): #MULTIPLAYER OPPONENT MOVING
                 threading.Thread(name='Multiplayer Host Actual', target=self.multiplayer.recv).start()
                 game.next_turn()
+                self.showing()
 
             elif (game.mode == 'puzzles' and game.current_color != game.own_color): #PUZZLE COMPUTER MOVING
                 if len(self.moves) == 0:
@@ -828,10 +870,13 @@ class Main:
                 else:
                     threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                 game.next_turn()
+                self.showing()
 
 
-            self.showing()
+
             pygame.display.update()
+            if game.mode != 'analyser': self.showing()
+
 
 
 

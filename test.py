@@ -1,48 +1,71 @@
 import pygame
+import pygame.font
 
-# Define the box dimensions
-box_width = 200
-box_height = 100
-
-# Define the text content
-text_content = "This is a long text that needs to fit within the box"
-
-# Initialize Pygame
+# Initialize pygame
 pygame.init()
 
-# Create a font object
-font = pygame.font.Font(None, 30)  # Start with an initial font size
+# Set up the window
+window_width = 800
+window_height = 600
+window = pygame.display.set_mode((window_width, window_height))
+pygame.display.set_caption('Speech Box Example')
 
-# Iterate and decrease the font size until the text fits within the box
-while font.size(text_content)[0] > box_width or font.size(text_content)[1] > box_height:
-    font_size = font.get_size()
-    font = pygame.font.Font(None, font_size - 1)
 
-# Render the text
-text_surface = font.render(text_content, True, (255, 255, 255))
 
-# Create a surface for the box
-box_surface = pygame.Surface((box_width, box_height))
-box_surface.fill((0, 0, 0))  # Fill the box with a black color
 
-# Calculate the center position for the text
-text_x = (box_width - text_surface.get_width()) // 2
-text_y = (box_height - text_surface.get_height()) // 2
 
-# Blit the text onto the box surface
-box_surface.blit(text_surface, (text_x, text_y))
 
-# Initialize the screen
-screen = pygame.display.set_mode((box_width, box_height))
-pygame.display.set_caption("Text Fit Example")
+margin = 10
+rectangle_width = 300 - 2 * margin
+rectangle_x = (window_width - rectangle_width) // 2
 
-# Blit the box surface onto the screen
-screen.blit(box_surface, (0, 0))
-pygame.display.flip()
 
-# Main loop
+font_size = 24
+font_color = pygame.Color('white')
+font = pygame.font.Font(None, font_size)
+
+
+text = "This is a sample text that we want to fit within the rectangle. It can be long or short."
+words = text.split()
+
+
+lines = []
+current_line = words[0]
+
+for word in words[1:]:
+    if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin:
+        current_line += ' ' + word
+    else:
+        lines.append(current_line)
+        current_line = word
+
+lines.append(current_line)
+line_height = font.size(lines[0])[1]
+text_height = len(lines) * line_height
+
+rectangle_height = text_height + 2 * margin + 5
+rectangle_y = (window_height - rectangle_height) // 2
+rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+
+text_x = rectangle.centerx - rectangle_width // 2 + margin
+text_y = rectangle.centery - text_height // 2 + margin - 10
+pygame.draw.rect(window, pygame.Color('pink'), rectangle)
+
+
+for line in lines:
+    rendered_text = font.render(line, True, font_color)
+    window.blit(rendered_text, (text_x, text_y))
+    text_y += line_height
+
+
+pygame.display.update()
+
+
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+# Quit the program
+pygame.quit()
