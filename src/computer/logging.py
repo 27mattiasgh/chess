@@ -79,7 +79,7 @@ class Logging:
             f.truncate()
             json.dump(data, f, indent=4)
 
-    def new(self):
+    def new(self, mode, own_color):
         '''
         Starts a new game in the games.json file.
         '''
@@ -90,9 +90,11 @@ class Logging:
         except: new_id = 1
         self.id = new_id
 
-        data[str(new_id)] = {"moves": []}
+        data[str(new_id)] = {"data":{'mode': mode, 'own_color': own_color}, "moves": []}
         with open(self.game_path, 'w') as file:
             json.dump(data, file)
+
+
 
     def add(self, old_fen, new_fen, move):
         '''

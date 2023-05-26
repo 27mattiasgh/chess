@@ -26,6 +26,9 @@ from src.multiplayer.multiplayer import Multiplayer
 
 large_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 70)
 medium_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 30)
+small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 20)
+
+grandmaster_fish = pygame.transform.scale(pygame.image.load(r'fish.png'), (70, 70))
 
 class Main:
     def __init__(self):
@@ -46,7 +49,7 @@ class Main:
         self.analyzer = Analyzer(stockfish_path, data_file)
 
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
         self.clock = pygame.time.Clock()
 
 
@@ -58,24 +61,16 @@ class Main:
 
 
     def mode_computer(self):
-        self.logging.new()
         self.py_chess = chess.Board()  
 
         self.game.mode = 'computer'
-        self.game.own_color = 'white'
+        self.game.own_color = 'black'
         self.game.current_color = 'white'
+        self.logging.new(self.game.mode, self.game.own_color)
         self.game.setup()
 
-    def mode_multiplayer(self):
-        self.logging.new()
-        self.py_chess = chess.Board()  
 
-        self.game.mode = 'multiplayer'
-        self.game.own_color = 'white' 
-        self.game.current_color = 'white'
-        self.multiplayer.setup = True
 
-        self.game.setup() #make sure its after so the game initialization values have been set #change
 
     def mode_puzzles(self, reset=False):
         
@@ -304,12 +299,12 @@ class Main:
         self.game.add_highlight(released_row, released_col, 'puzzle_incorrect')
    
     def multiplayer_host(self):
-        self.logging.new()
         self.py_chess = chess.Board() 
 
         self.game.mode = 'multiplayer' 
         self.game.own_color = 'white' 
         self.game.current_color = 'white'
+        self.logging.new(self.game.mode, self.game.own_color)
         self.multiplayer.setup = True
 
 
@@ -328,12 +323,12 @@ class Main:
         self.multiplayer.host_setup()
 
     def multiplayer_user(self):
-        self.logging.new()
         self.py_chess = chess.Board() 
 
         self.game.mode = 'multiplayer' 
         self.game.own_color = 'black' 
         self.game.current_color = 'white'
+        self.logging.new(self.game.mode, self.game.own_color)
         self.multiplayer.setup = True
 
 
@@ -731,15 +726,13 @@ class Main:
                     
 
 
-
-
-
             elif game.mode == 'analyzer':
 
                 with open(r'assets\data\analyzer.json', 'r') as f: moves = json.load(f)
 
                 self.screen.blit(self.background, (0, 0))
                 
+
                 self.game.show_background(self.screen)
                 self.game.show_last_move(self.screen)
                 self.game.show_highlight(self.screen)
@@ -747,26 +740,27 @@ class Main:
                 self.game.show_pieces(self.screen)
                 self.game.show_hover(self.screen)
 
+                game.own_color = moves[0][0]['own_color']
+                game.setup(moves[game.analysis_current_move + 1][0]['FEN']) 
 
-                game.setup(moves[game.analysis_current_move][0]['FEN']) 
+
                 transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
                 pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
                 screen.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
 
                 margin = 10
-                rectangle_width = 205
+                rectangle_width = (WINDOW_WIDTH-WIDTH) - 60
                 rectangle_x = WIDTH + 30
 
 
                 font_size = 24
                 font_color = pygame.Color('white')
-                font = pygame.font.Font(None, font_size)
+                
 
 
-                text = moves[game.analysis_current_move][0]['Description']
+                text = moves[game.analysis_current_move + 1][0]['Description']
 
                 if text is not None:
-                    print(text)
                     words = text.split()
 
 
@@ -774,7 +768,7 @@ class Main:
                     current_line = words[0]
 
                     for word in words[1:]:
-                        if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin:
+                        if small_font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin:
                             current_line += ' ' + word
                         else:
                             lines.append(current_line)
@@ -782,7 +776,7 @@ class Main:
 
 
                     lines.append(current_line)
-                    line_height = font.size(lines[0])[1]
+                    line_height = small_font.size(lines[0])[1]
                     text_height = len(lines) * line_height
 
                     rectangle_height = text_height + 2 * margin + 5
@@ -792,14 +786,50 @@ class Main:
                     text_x = rectangle.centerx - rectangle_width // 2 + margin
                     text_y = rectangle.centery - text_height // 2 + margin - 10
 
-                    pygame.draw.rect(screen, pygame.Color('grey'), rectangle)
+
+
+
+
+
+                    transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
+                    pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
+                    screen.blit(transparent_surface, (rectangle_x, rectangle_y))
+
+                    # triangle_height = 30
+                    # triangle_width = 30
+                    # triangle_color = (255, 255, 255, 25)
+                    # triangle_x = rectangle_x + rectangle_width - 50
+                    # triangle_y = rectangle_y + rectangle_height
+                    
+                    # triangle_points = [(triangle_x, triangle_y), (triangle_x + triangle_width, triangle_y), (triangle_x + triangle_width // 2, triangle_y + triangle_height)]
+                    # pygame.draw.polygon(screen, triangle_color, triangle_points)
+
+
+
+                    triangle_height = 30
+                    triangle_width = 30
+                    triangle_color = (255, 255, 255, 25)
+                    triangle_x = rectangle_x + rectangle_width - 50
+                    triangle_y = rectangle_y + rectangle_height
+
+                    triangle_surface = pygame.Surface((triangle_width, triangle_height), pygame.SRCALPHA)
+                    triangle_points = [(triangle_x, triangle_y), (triangle_x + triangle_width, triangle_y), (triangle_x + triangle_width // 2, triangle_y + triangle_height)]
+                    
+
+                    
+                    pygame.draw.polygon(triangle_surface, triangle_color, triangle_points)
+                    screen.blit(triangle_surface, (triangle_x, triangle_y))
 
 
 
                     for line in lines:
-                        rendered_text = font.render(line, True, font_color)
+                        rendered_text = small_font.render(line, True, font_color)
                         screen.blit(rendered_text, (text_x, text_y))
                         text_y += line_height
+
+
+
+                    screen.blit(grandmaster_fish, (rectangle_x, rectangle_y+rectangle_height+40))
 
 
 
@@ -809,13 +839,13 @@ class Main:
 
 
                     elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT and game.analysis_current_move > 0:
+                        if event.key == pygame.K_LEFT and game.analysis_current_move  > 1:
                             game.analysis_current_move -= 1
                             game.highlighted_squares.clear()
  
                             
 
-                        elif event.key == pygame.K_RIGHT and game.analysis_current_move < len(moves) - 1:
+                        elif event.key == pygame.K_RIGHT and game.analysis_current_move + 1 < len(moves) - 1:
                                 game.analysis_current_move += 1
                                 game.highlighted_squares.clear()
 
@@ -823,31 +853,7 @@ class Main:
 
 
                         
-                        # elif event.key == pygame.K_RIGHT and game.analysis_current_move == len(moves) - 1 and not game.analysis_last_move_found:
 
-                        #     py_chess.set_fen(moves[-1][0]['FEN'])
-                        #     py_chess.push_uci(moves[-1][0]['Move'])
-
-
-                        #     moves.append([{"Move":moves[-1][0]['Move'], "Best Move": moves[-1][0]['Move'], "Type": "Best Move", "Description": "And thats checkmate. Great Game!", "Accuracy": "100%", "FEN": py_chess.fen()}])
-                        #     with open('assets/data/analyzer.json', 'w') as f: json.dump(moves, f)
-
-                        #     game.analysis_current_move += 1
-                        #     game.analysis_last_move_found = True
-
-                        #     if self.py_chess.is_checkmate():
-                        #         row, col, finalrow, finalcol = game.uci_to_rowcol(moves[-1][0]['Move'])
-                        #         game.add_highlight(finalrow, finalcol, 'checkmate')
-
-                        #         checkmate_color = 'black' if py_chess.turn else 'white'
-
-                        #         if checkmate_color == 'white':
-                        #             initial_row, initial_col, final_row, final_col = game.uci_to_rowcol('a1' + chess.square_name(py_chess.king(chess.BLACK)))
-                        #             game.add_highlight(final_row, final_col, 'highlight')
-
-                        #         else:
-                        #             initial_row, initial_col, final_row, final_col = game.uci_to_rowcol('a1' + chess.square_name(py_chess.king(chess.WHITE)))
-                        #             game.add_highlight(finalrow, final_col, 'highlight')
 
             elif(game.mode == 'computer' and game.current_color != game.own_color):
 

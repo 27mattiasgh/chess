@@ -128,6 +128,120 @@ class Analyzer:
 
 
 
+        self.opponent_best_move_descriptions = [
+    "That was a strong move by your opponent. They've demonstrated exceptional tactical awareness.",
+    "The opponent's play is impressive! Their move showcases deep understanding of the position.",
+    "Your opponent made a genius move! They've outplayed you with this brilliant choice.",
+    "The opponent's move is flawless! They're dominating the game with exceptional play.",
+    "Your opponent's strategic insight is truly impressive. They made a remarkable move!",
+    "The opponent's move is superb! They've seized a significant advantage in the position.",
+    "Your opponent's play is outstanding! Their move sets up a powerful attack.",
+    "The opponent's decision is excellent! They found the most promising continuation.",
+    "That was a stunning move by your opponent! They're showing great precision in their play.",
+    "The opponent made an amazing move! Their calculation skills are paying off handsomely."
+]
+
+        self.opponent_great_descriptions = [
+            "That was a terrific move by your opponent! Their positional understanding is top-notch.",
+            "The opponent's play is impressive! Their moves consistently show deep understanding.",
+            "Your opponent made an excellent maneuver! Their grasp of strategy is highly commendable.",
+            "The opponent's choice is superb! Their positional play is a joy to behold.",
+            "That was a splendid move by your opponent! Their intuition in this game is truly remarkable.",
+            "The opponent made a great decision! Their moves consistently put pressure on you.",
+            "Well executed by your opponent! Their play demonstrates a high level of competence.",
+            "That was a commendable move by your opponent! They're consistently making strong decisions.",
+            "Your opponent is playing brilliantly! Their moves are filled with creativity.",
+            "The opponent made a masterful move! Their play exhibits a profound understanding of chess."
+        ]
+
+        self.opponent_good_descriptions = [
+            "That was a solid move by your opponent! They're steadily improving their position.",
+            "The opponent's play is decisive! Their moves are efficient and effective.",
+            "Nice maneuver by your opponent! Their strategic choices are paying off.",
+            "Well done by your opponent! Their consistent play is keeping the game balanced.",
+            "Good decision by your opponent! They're making smart moves to maintain control.",
+            "Resolute move by your opponent! Their play displays determination and focus.",
+            "Capable choice by your opponent! Their moves are proving to be well thought out.",
+            "Your opponent is on the right track! Their play is solid and reliable.",
+            "Impressive performance by your opponent! Their moves reflect good judgment.",
+            "Your opponent's play is commendable! They're making sensible decisions."
+        ]
+
+        self.opponent_inaccuracy_descriptions = [
+            "The opponent made a minor slip. They overlooked a slightly stronger move.",
+            "That was a slight misstep by your opponent. There was a more accurate option available.",
+            "Not the most precise move by your opponent. They missed a subtler possibility.",
+            "The opponent made a small deviation. Their move slightly weakens their position.",
+            "A slight miscalculation by your opponent. They could have gained a bit more.",
+            "An imprecise move by your opponent. Their decision could have been sharper.",
+            "A minor error by your opponent. Their move could have been a touch more optimal.",
+            "The opponent missed a small opportunity. Their move could have been stronger.",
+            "A slight oversight by your opponent. There was a more precise move to consider.",
+            "A tiny inaccuracy by your opponent. Their move doesn't fully exploit the position."
+        ]
+
+        self.opponent_mistake_descriptions = [
+            "That was a regrettable mistake by your opponent. They missed a significant chance.",
+            "An unfortunate blunder by your opponent. Their move hands the advantage to you.",
+            "A costly error by your opponent. Their decision puts them on the back foot.",
+            "A major oversight by your opponent. Their move allows you a strong counterplay.",
+            "A critical mistake by your opponent. Their position has been seriously compromised.",
+            "A significant misjudgment by your opponent. Their move leads to unfavorable consequences.",
+            "A grave blunder by your opponent. You now have a decisive advantage.",
+            "A substantial mistake by your opponent. Their move undermines their own position.",
+            "A serious lapse by your opponent. Their decision allows you to seize control.",
+            "A major misstep by your opponent. Their move jeopardizes their chances of success."
+        ]
+
+        self.opponent_blunder_descriptions = [
+            "That was a disastrous blunder by your opponent! Their move is a catastrophic mistake.",
+            "A fatal error by your opponent. Their decision leads to an irreparable loss of material.",
+            "A crushing blunder by your opponent. Their position now teeters on the brink of collapse.",
+            "A game-changing mistake by your opponent. Their move completely turns the tables.",
+            "An epic blunder by your opponent. You must be ecstatic with this gift.",
+            "A monumental error by your opponent. Their move virtually hands the victory to you.",
+            "A colossal blunder by your opponent. Their position now looks nearly hopeless.",
+            "A catastrophic oversight by your opponent. Their move leads to a quick and decisive defeat.",
+            "A devastating blunder by your opponent. Their chances of recovery are extremely slim.",
+            "A horrendous mistake by your opponent. Their move leaves them in an almost impossible situation."
+        ]
+
+        self.opponent_forced_descriptions = [
+            "No other choice for your opponent. They played the only move available.",
+            "A forced decision by your opponent. All other options were unfavorable.",
+            "Their move was inevitable. Your opponent had no better alternatives.",
+            "A constrained move by your opponent. The position allowed no other possibilities.",
+            "They had to play that move. Your opponent had no other option that would suffice.",
+            "The only reasonable move by your opponent. Other choices were unsound.",
+            "A necessary decision by your opponent. All other moves would lead to disaster.",
+            "Their move was dictated by the position. No other moves made sense for your opponent.",
+            "Your opponent was compelled to make that move. They had no better options.",
+            "A mandatory move by your opponent. They had no other viable alternatives."
+        ]
+
+        self.opponent_book_move_descriptions = [
+            "That was a strong opening move by your opponent! They're following a well-known book line.",
+            "A classic opening move by your opponent! They're playing a common and respected variation.",
+            "A strong opening move by your opponent! They're establishing a solid foundation for their position.",
+            "A well-chosen opening move by your opponent! They're entering familiar territory.",
+            "A traditional opening move by your opponent! They're adhering to established principles.",
+            "A popular opening move by your opponent! They're playing a move frequently seen in high-level games.",
+            "A strategic opening move by your opponent! They're positioning their pieces optimally.",
+            "A recommended opening move by your opponent! They're following the footsteps of grandmasters.",
+            "A common opening move by your opponent! They're playing a move often seen in this opening.",
+            "A book move by your opponent! They're making a well-known and respected choice in this position.",
+            "A great opening move by your opponent! They're setting themselves up for success right from the start.",
+            "A strong choice by your opponent! They're starting the game with a well-regarded move.",
+            "A wise opening move by your opponent! They're displaying good opening preparation.",
+            "A respected opening move by your opponent! They're playing a move favored by experts.",
+            "A reliable opening move by your opponent! They're entering a line known for its solid play.",
+            "A recommended choice by your opponent! They're making a move that leads to promising positions.",
+            "An excellent opening move by your opponent! They're demonstrating sound opening principles.",
+            "A strategic choice by your opponent! They're aiming for a favorable middlegame with this move.",
+            "A popular move by your opponent! They're selecting a line that has been extensively studied.",
+            "A well-established opening move by your opponent! They're in familiar territory with this choice."
+]
+
 
 
 
@@ -141,11 +255,12 @@ class Analyzer:
         self.old_fen_list = [move['old_fen'] for move in self.data[number]['moves']]
         self.new_fen_list = [move['new_fen'] for move in self.data[number]['moves']]
 
-        print(len(self.old_fen_list), len(self.new_fen_list))
 
 
         self.classification_list = [move['classification'] for move in self.data[number]['moves']]
         self.move_list = [move['move'] for move in self.data[number]['moves']]
+
+        self.own_color = self.data[number]['data']['own_color']
 
 
 
@@ -168,15 +283,16 @@ class Analyzer:
 
 
 
-    def generate_description(self, categorization):
-        if categorization == "Best Move": return random.choice(self.best_move_descriptions)
-        if categorization == "Great": return random.choice(self.great_descriptions)
-        if categorization == "Good": return random.choice(self.good_descriptions)       
-        if categorization == "Inaccuracy": return random.choice(self.inaccuracy_descriptions)
-        if categorization == "Mistake": return random.choice(self.mistake_descriptions)
-        if categorization == "Blunder": return random.choice(self.blunder_descriptions)
-        if categorization == 'Book': return random.choice(self.book_move_descriptions)
-        else: return random.choice(self.forced_descriptions)
+    def generate_description(self, categorization, is_own):
+        if categorization == "Best Move": return random.choice(self.best_move_descriptions if is_own else self.opponent_best_move_descriptions)
+        if categorization == "Great": return random.choice(self.great_descriptions if is_own else self.opponent_great_descriptions)
+        if categorization == "Good": return random.choice(self.good_descriptions if is_own else self.opponent_good_descriptions)       
+        if categorization == "Inaccuracy": return random.choice(self.inaccuracy_descriptions if is_own else self.opponent_inaccuracy_descriptions)
+        if categorization == "Mistake": return random.choice(self.mistake_descriptions if is_own else self.opponent_mistake_descriptions)
+        if categorization == "Blunder": return random.choice(self.blunder_descriptions if is_own else self.opponent_blunder_descriptions)
+        if categorization == 'Book': return random.choice(self.book_move_descriptions if is_own else self.opponent_book_move_descriptions)
+        else: return random.choice(self.forced_descriptions if is_own else self.opponent_forced_descriptions)
+
 
 
 
@@ -185,45 +301,42 @@ class Analyzer:
         stockfish.set_fen_position(fen)
         moves = stockfish.get_top_moves(10)
 
+        ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = fen.split()
+        active_color = 'white' if 'w' in active_color else 'black'
+        is_own = True if active_color == self.own_color else False
 
-        
+
         total_moves = len(moves)
         result = []
 
         played_move = self.move_list[self.old_fen_list.index(fen)]
         is_book_move =  True if self.classification_list[self.old_fen_list.index(fen)] == 'book' else False
-
-
-
         new_fen = self.new_fen_list[self.old_fen_list.index(fen)]
-
-
-
-
         found_move = False
 
         for position, move in enumerate(moves):
             if move['Move'] == played_move:
                 accuracy = round((1 - position / total_moves) * 100, 2)
                 categorization = "Book" if is_book_move else self.categorize_move(position, total_moves)
-                description = self.generate_description(categorization)
+                description = self.generate_description(categorization, is_own)
+
 
                 result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": categorization, "Description": description, "Accuracy": accuracy, "Old FEN": fen, "FEN": new_fen})
                 found_move = True
 
 
         if not found_move:
-            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder"), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen})
+            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder", is_own), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen})
 
         if chess.Board(fen).legal_moves.count() == 1:
-            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Forced", "Description":self.generate_description("Forced"), "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen})
+            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Forced", "Description":self.generate_description("Forced", is_own), "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen})
 
 
         return result
 
     def analyze(self):
 
-        results = [[{"Move": None, "Best Move": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}]]
+        results = [[{"own_color": self.own_color}], [{"Move": None, "Best Move": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}]]
 
 
 
