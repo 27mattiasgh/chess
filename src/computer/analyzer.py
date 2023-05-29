@@ -103,28 +103,6 @@ class Analyzer:
             "A mandatory move. You had no other viable alternatives."
         ]
 
-        self.book_move_descriptions = [
-            "A solid opening move! You're following a well-known book line.",
-            "A classic opening move! You're playing a common and respected variation.",
-            "A strong opening move! You're establishing a solid foundation for your position.",
-            "A well-chosen opening move! You're entering a familiar territory.",
-            "A traditional opening move! You're adhering to established principles.",
-            "A popular opening move! You're playing a move frequently seen in high-level games.",
-            "A strategic opening move! You're positioning your pieces optimally.",
-            "A recommended opening move! You're following the footsteps of grandmasters.",
-            "A common opening move! You're playing a move often seen in this opening.",
-            "A book move! You're making a well-known and respected choice in this position.",
-            "A great opening move! You're setting yourself up for success right from the start.",
-            "A strong choice! You're starting the game with a well-regarded move.",
-            "A wise opening move! You're displaying good opening preparation.",
-            "A respected opening move! You're playing a move favored by experts.",
-            "A reliable opening move! You're entering a line known for its solid play.",
-            "A recommended choice! You're making a move that leads to promising positions.",
-            "An excellent opening move! You're demonstrating sound opening principles.",
-            "A strategic choice! You're aiming for a favorable middlegame with this move.",
-            "A popular move! You're selecting a line that has been extensively studied.",
-            "A well-established opening move! You're in familiar territory with this choice."
-        ]
 
 
 
@@ -244,6 +222,43 @@ class Analyzer:
 
 
 
+        self.missed_move = [
+            " Unfortunately, you missed the opportunity to make the best move, {}. This move would have been a masterful decision, capitalizing on your opponent's oversight and paving the way for victory.",
+            " It appears that you didn't recognize the best move, {}, which would have showcased your exceptional foresight and allowed you to anticipate future threats, securing a dominant position on the board.",
+            " Regrettably, you didn't choose {} as the best move, missing out on an opportunity to demonstrate your impeccable calculation skills and exploit positional weaknesses, gaining a substantial advantage.",
+            " According to optimal play, {} was the best move to make. Unfortunately, you didn't select it, which would have allowed you to leverage your superior strategic understanding and seize control of the game.",
+            " It's unfortunate that you didn't make the best move, {}. This move would have demonstrated your profound knowledge of game principles and enabled you to maneuver towards a favorable outcome with precision and finesse.",
+            " You missed the chance to choose {} as the best move, which would have showcased your deep positional understanding and strategically positioned your pieces for a decisive blow.",
+            " It seems you overlooked the best move, {}, which would have been a testament to your sharp tactical vision. This move could have allowed you to exploit a tactical opportunity and achieve a decisive outcome.",
+            " The best move, {}, eluded you this time. This move would have demonstrated your keen sense of strategy and positioned you for a favorable outcome, but unfortunately, you didn't play it.",
+            " Unfortunately, you didn't recognize the optimal move, {}, missing an opportunity to showcase your tactical acumen. This move could have exploited a tactical weakness and led to a decisive advantage.",
+            " You didn't choose {} as the best move, which is unfortunate. This move would have displayed your ability to capitalize on positional opportunities and gain a significant advantage over your opponent."
+]
+
+
+        self.opening_explanation = [
+            "This opening is called {}.",
+            "I recognize this opening! I believe it is called the {}.",
+            "Ahh, the {}. This is one of my favorites!",
+            "Ah, yes! The {}. A classic opening move.",
+            "I'm familiar with this one. It's called the {}.",
+            "The opening you've played is known as {}. It has been used by many chess players.",
+            "I've seen this opening before. It's commonly referred to as {}.",
+            "That's the {}. It's known for its strategic value.",
+            "Interesting choice! You've played the {}. It has its own unique characteristics.",
+            "Ah, the {}. It's known for its versatility in various chess positions.",
+            "The opening move you made, {}. It's an exciting choice!",
+            "Oh, the {}. It's a well-known opening among chess enthusiasts.",
+            "The {}. A solid choice to start the game!",
+            "Ah, the {}. It often leads to interesting middle game positions.",
+            "That's the {}. It's known for its aggressive nature.",
+            "You've played the {}. It's a popular choice in modern chess.",
+            "Ah, the {}. It's a strategic opening with multiple variations.",
+            "That's the {}. It's a tactical opening that can catch opponents off guard.",
+            "You've chosen the {}. It's a flexible opening with many possible outcomes.",
+            "The opening move you made, {}. It's known for its solid positional play.",
+            "Oh, the {}. It's a dynamic opening that can lead to sharp and complex positions."
+        ]
 
 
     def load_data(self):
@@ -254,7 +269,7 @@ class Analyzer:
 
         self.old_fen_list = [move['old_fen'] for move in self.data[number]['moves']]
         self.new_fen_list = [move['new_fen'] for move in self.data[number]['moves']]
-
+        self.opening_list = [move['opening'] for move in self.data[number]['moves']]
 
 
         self.classification_list = [move['classification'] for move in self.data[number]['moves']]
@@ -283,15 +298,31 @@ class Analyzer:
 
 
 
-    def generate_description(self, categorization, is_own):
-        if categorization == "Best Move": return random.choice(self.best_move_descriptions if is_own else self.opponent_best_move_descriptions)
-        if categorization == "Great": return random.choice(self.great_descriptions if is_own else self.opponent_great_descriptions)
-        if categorization == "Good": return random.choice(self.good_descriptions if is_own else self.opponent_good_descriptions)       
-        if categorization == "Inaccuracy": return random.choice(self.inaccuracy_descriptions if is_own else self.opponent_inaccuracy_descriptions)
-        if categorization == "Mistake": return random.choice(self.mistake_descriptions if is_own else self.opponent_mistake_descriptions)
-        if categorization == "Blunder": return random.choice(self.blunder_descriptions if is_own else self.opponent_blunder_descriptions)
-        if categorization == 'Book': return random.choice(self.book_move_descriptions if is_own else self.opponent_book_move_descriptions)
-        else: return random.choice(self.forced_descriptions if is_own else self.opponent_forced_descriptions)
+    def generate_description(self, categorization, is_own, best_move, opening):
+        prompt = None
+
+        if categorization == "Best Move": prompt = random.choice(self.best_move_descriptions if is_own else self.opponent_best_move_descriptions)
+        elif categorization == "Great": prompt = random.choice(self.great_descriptions if is_own else self.opponent_great_descriptions)
+        elif categorization == "Good": prompt = random.choice(self.good_descriptions if is_own else self.opponent_good_descriptions)       
+        elif categorization == "Inaccuracy": prompt = random.choice(self.inaccuracy_descriptions if is_own else self.opponent_inaccuracy_descriptions)
+        elif categorization == "Mistake": prompt = random.choice(self.mistake_descriptions if is_own else self.opponent_mistake_descriptions)
+        elif categorization == "Blunder": prompt = random.choice(self.blunder_descriptions if is_own else self.opponent_blunder_descriptions)
+        elif categorization == 'Book': prompt = None if is_own else random.choice(self.opponent_book_move_descriptions)
+        elif categorization == 'Forced': prompt = random.choice(self.forced_descriptions if is_own else self.opponent_forced_descriptions)
+
+
+
+        if categorization not in ["Best Move", "Forced", "Book"] and is_own:
+            missed_prompt = random.choice(self.missed_move)
+            prompt += missed_prompt.format(best_move)
+
+        elif categorization == "Book" and is_own:
+            book_prompt = random.choice(self.opening_explanation)
+            prompt = book_prompt.format(opening)
+        return prompt
+
+
+
 
 
 
@@ -314,29 +345,29 @@ class Analyzer:
         new_fen = self.new_fen_list[self.old_fen_list.index(fen)]
         found_move = False
 
+        opening = self.opening_list[self.old_fen_list.index(fen)]
+ 
         for position, move in enumerate(moves):
             if move['Move'] == played_move:
                 accuracy = round((1 - position / total_moves) * 100, 2)
                 categorization = "Book" if is_book_move else self.categorize_move(position, total_moves)
-                description = self.generate_description(categorization, is_own)
+                description = self.generate_description(categorization, is_own, moves[0]['Move'], opening)
 
 
-                result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": categorization, "Description": description, "Accuracy": accuracy, "Old FEN": fen, "FEN": new_fen})
+                result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": categorization, "Description": description, "Accuracy": accuracy, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
                 found_move = True
 
 
         if not found_move:
-            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder", is_own), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen})
+            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder", is_own, moves[0]['Move'], opening), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
 
         if chess.Board(fen).legal_moves.count() == 1:
-            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Forced", "Description":self.generate_description("Forced", is_own), "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen})
-
-
+            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Forced", "Description":self.generate_description("Forced", is_own, moves[0]['Move'], opening), "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen, "Opening": opening})
         return result
 
-    def analyze(self):
 
-        results = [[{"own_color": self.own_color}], [{"Move": None, "Best Move": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'}]]
+    def analyze(self):
+        results = [[{"own_color": self.own_color}], [{"Move": None, "Best Move": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', "Opening": None}]]
 
 
 
@@ -349,6 +380,17 @@ class Analyzer:
             json.dump(results, f)
 
         
+
+
+    def categorization_color(self, categorization):
+        if categorization == "Best Move": return (80, 199, 80) 
+        elif categorization == "Great": return (132, 209, 132) 
+        elif categorization == "Good": return (158, 215, 158)
+        elif categorization == "Inaccuracy": return (222, 222, 129)
+        elif categorization == "Mistake": return (219, 152, 86)
+        elif categorization == "Blunder": return (232, 112, 77)
+        elif categorization == 'Book': return (166, 127, 89)
+        elif categorization == 'Forced': return (131, 183, 235)
 
 
 

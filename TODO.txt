@@ -22,3 +22,11 @@
 
 
 - Add en passant for BLACK
+
+
+
+
+
+
+
+MAKE BUTTONS TRANSPARENT

@@ -126,28 +126,18 @@ class Home:
 
         # Quick Analisys 
         transparent_surface = pygame.Surface((477, 230), pygame.SRCALPHA)
-        pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, 209, 85), border_radius=10)
+        pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, 209, 190), border_radius=10)
         surface.blit(transparent_surface, (760, 505))
 
-        join_game_text = medium_font.render("Analyze Last Game", True, (255, 255, 255))
+
+
+        join_game_text = medium_font.render("Analyze", True, (255, 255, 255))
         text_rect = join_game_text.get_rect()
         text_x = 760 + (209 - text_rect.width) // 2
-        text_y = 505 + (85 - text_rect.height) // 2
+        text_y = 505 + (190 - text_rect.height) // 2
         surface.blit(join_game_text, (text_x, text_y))
 
-        # Training
-        transparent_surface = pygame.Surface((477, 230), pygame.SRCALPHA)
-        pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, 209, 85), border_radius=10)
-        surface.blit(transparent_surface, (760, 610))
 
-
-
-
-        create_game_text = medium_font.render("Training", True, (255, 255, 255))
-        text_rect = create_game_text.get_rect()
-        text_x = 760 + (209 - text_rect.width)// 2
-        text_y = 610 + (85 - text_rect.height) // 2
-        surface.blit(create_game_text, (text_x, text_y))
 
         reset_surface = large_font.render(f"Analysis", True, (255, 255, 255))
         surface.blit(reset_surface, (522, 485))

@@ -28,7 +28,7 @@ large_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 70)
 medium_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 30)
 small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 20)
 
-grandmaster_fish = pygame.transform.scale(pygame.image.load(r'fish.png'), (70, 70))
+grandmaster_fish = pygame.transform.scale(pygame.image.load(r'assets\images\fish.png'), (70, 70))
 
 class Main:
     def __init__(self):
@@ -407,26 +407,21 @@ class Main:
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONUP:
 
-
-                        #pygame.Rect(268, 260, 209, 85)
                         if pygame.Rect(268, 260, 209, 85).collidepoint(event.pos):
                             self.multiplayer_user()
-                        if pygame.Rect(268, 365, 209, 85).collidepoint(event.pos):
+
+                        elif pygame.Rect(268, 365, 209, 85).collidepoint(event.pos):
                             self.multiplayer_host()
 
-
-                        if pygame.Rect(760, 260, 209, 190).collidepoint(event.pos):
+                        elif pygame.Rect(760, 260, 209, 190).collidepoint(event.pos):
                             self.mode_computer()
 
-
-                        if pygame.Rect(268, 505, 209, 190).collidepoint(event.pos):
+                        elif pygame.Rect(268, 505, 209, 190).collidepoint(event.pos):
                             self.mode_puzzles()
 
-
-                        if pygame.Rect(760, 505, 209, 85).collidepoint(event.pos):
+                        elif pygame.Rect(760, 505, 209, 190).collidepoint(event.pos):
                             self.mode_analyzer()
-                        if pygame.Rect(760, 610, 209, 85).collidepoint(event.pos):
-                            self.mode_training()
+
 
 
 
@@ -434,7 +429,6 @@ class Main:
 
                 pygame.display.flip()
                 
-
             screen = self.screen
             game = self.game
             board = self.game.board
@@ -724,15 +718,11 @@ class Main:
                         pygame.quit()
                         sys.exit()
                     
-
-
             elif game.mode == 'analyzer':
 
                 with open(r'assets\data\analyzer.json', 'r') as f: moves = json.load(f)
 
                 self.screen.blit(self.background, (0, 0))
-                
-
                 self.game.show_background(self.screen)
                 self.game.show_last_move(self.screen)
                 self.game.show_highlight(self.screen)
@@ -743,7 +733,6 @@ class Main:
                 game.own_color = moves[0][0]['own_color']
                 game.setup(moves[game.analysis_current_move + 1][0]['FEN']) 
 
-
                 transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
                 pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
                 screen.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
@@ -752,74 +741,36 @@ class Main:
                 rectangle_width = (WINDOW_WIDTH-WIDTH) - 60
                 rectangle_x = WIDTH + 30
 
-
-                font_size = 24
-                font_color = pygame.Color('white')
-                
-
-
+                font_color = (255, 255, 255)
                 text = moves[game.analysis_current_move + 1][0]['Description']
+
+
+
+
 
                 if text is not None:
                     words = text.split()
-
-
                     lines = []
                     current_line = words[0]
-
                     for word in words[1:]:
-                        if small_font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin:
+                        if small_font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin: 
                             current_line += ' ' + word
                         else:
                             lines.append(current_line)
                             current_line = word
-
-
                     lines.append(current_line)
                     line_height = small_font.size(lines[0])[1]
                     text_height = len(lines) * line_height
-
                     rectangle_height = text_height + 2 * margin + 5
-                    rectangle_y = 200
+                    rectangle_y = 115
                     rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
-
                     text_x = rectangle.centerx - rectangle_width // 2 + margin
                     text_y = rectangle.centery - text_height // 2 + margin - 10
-
-
-
-
 
 
                     transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
                     pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
                     screen.blit(transparent_surface, (rectangle_x, rectangle_y))
-
-                    # triangle_height = 30
-                    # triangle_width = 30
-                    # triangle_color = (255, 255, 255, 25)
-                    # triangle_x = rectangle_x + rectangle_width - 50
-                    # triangle_y = rectangle_y + rectangle_height
-                    
-                    # triangle_points = [(triangle_x, triangle_y), (triangle_x + triangle_width, triangle_y), (triangle_x + triangle_width // 2, triangle_y + triangle_height)]
-                    # pygame.draw.polygon(screen, triangle_color, triangle_points)
-
-
-
-                    triangle_height = 30
-                    triangle_width = 30
-                    triangle_color = (255, 255, 255, 25)
-                    triangle_x = rectangle_x + rectangle_width - 50
-                    triangle_y = rectangle_y + rectangle_height
-
-                    triangle_surface = pygame.Surface((triangle_width, triangle_height), pygame.SRCALPHA)
-                    triangle_points = [(triangle_x, triangle_y), (triangle_x + triangle_width, triangle_y), (triangle_x + triangle_width // 2, triangle_y + triangle_height)]
-                    
-
-                    
-                    pygame.draw.polygon(triangle_surface, triangle_color, triangle_points)
-                    screen.blit(triangle_surface, (triangle_x, triangle_y))
-
 
 
                     for line in lines:
@@ -829,7 +780,59 @@ class Main:
 
 
 
-                    screen.blit(grandmaster_fish, (rectangle_x, rectangle_y+rectangle_height+40))
+                    triangle_points = [(rectangle_x + 200, rectangle_y + rectangle_height), (rectangle_x + 230, rectangle_y + rectangle_height), (rectangle_x + 215, rectangle_y + rectangle_height + 15)]
+                    transparent_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+                    pygame.draw.polygon(transparent_surface, (255, 255, 255, 25), triangle_points)
+                    screen.blit(transparent_surface, (0, 0))
+
+                    screen.blit(grandmaster_fish, (rectangle_x, rectangle_y+rectangle_height+20))
+
+                    grandmaster = small_font.render("Grandmaster", True, font_color)
+                    grouper = small_font.render("Grouper", True, font_color)
+                    screen.blit(grandmaster, (text_x + 73, rectangle_y+rectangle_height+30))
+                    screen.blit(grouper, (text_x + 73, rectangle_y+rectangle_height+50))
+
+
+                    current_categorization = moves[game.analysis_current_move + 1][0]['Type']
+                    color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18).render(current_categorization, True, (255, 255, 255))
+                    color_rect = pygame.draw.rect(screen, self.analyzer.categorization_color(current_categorization), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
+                    color_surface_rect = color_surface.get_rect(center=color_rect.center)
+                    screen.blit(color_surface, color_surface_rect)
+
+
+                else:
+
+
+                    pass
+
+
+
+
+
+                transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+                screen.blit(transparent_surface, (WIDTH + 30, HEIGHT - 95))
+
+                join_game_text = small_font.render("Next", True, (255, 255, 255))
+                text_rect = join_game_text.get_rect()
+                text_x = WIDTH + 30 + ((WINDOW_WIDTH-WIDTH) - 60 - text_rect.width) // 2
+                text_y = HEIGHT - 95 + (50 - text_rect.height) // 2
+                screen.blit(join_game_text, (text_x, text_y))
+
+
+                transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+                screen.blit(transparent_surface, (WIDTH + 30, HEIGHT - 35))
+
+                join_game_text = small_font.render("Previous", True, (255, 255, 255))
+                text_rect = join_game_text.get_rect()
+                text_x = WIDTH + 30 + ((WINDOW_WIDTH-WIDTH) - 60 - text_rect.width) // 2
+                text_y = HEIGHT - 35 + (50 - text_rect.height) // 2
+                screen.blit(join_game_text, (text_x, text_y))
+
+
+
+
 
 
 
@@ -846,13 +849,21 @@ class Main:
                             
 
                         elif event.key == pygame.K_RIGHT and game.analysis_current_move + 1 < len(moves) - 1:
+                            game.analysis_current_move += 1
+                            game.highlighted_squares.clear()
+
+                    elif event.type == pygame.MOUSEBUTTONUP:
+
+                        if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.analysis_current_move  > 1: #Reset
+                            game.analysis_current_move -= 1
+                            game.highlighted_squares.clear()
+
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.analysis_current_move + 1 < len(moves) - 1: 
                                 game.analysis_current_move += 1
                                 game.highlighted_squares.clear()
 
 
 
-
-                        
 
 
             elif(game.mode == 'computer' and game.current_color != game.own_color):
@@ -877,8 +888,6 @@ class Main:
                     threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                 game.next_turn()
                 self.showing()
-
-
 
             pygame.display.update()
             if game.mode != 'analyser': self.showing()

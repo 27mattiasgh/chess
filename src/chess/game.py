@@ -50,7 +50,6 @@ class Game:
         self.board = Board(fen, self.own_color)
         self.dragger = Dragger()
 
-
     #show 
     def show_background(self, surface):
         """
