@@ -283,7 +283,7 @@ class Analyzer:
     @staticmethod
     def categorize_move(position, total_moves):
         if position == 0:
-            return "Best Move"
+            return "Best"
         elif position <= total_moves * 0.1:
             return "Great"
         elif position <= total_moves * 0.25:
@@ -301,7 +301,7 @@ class Analyzer:
     def generate_description(self, categorization, is_own, best_move, opening):
         prompt = None
 
-        if categorization == "Best Move": prompt = random.choice(self.best_move_descriptions if is_own else self.opponent_best_move_descriptions)
+        if categorization == "Best": prompt = random.choice(self.best_move_descriptions if is_own else self.opponent_best_move_descriptions)
         elif categorization == "Great": prompt = random.choice(self.great_descriptions if is_own else self.opponent_great_descriptions)
         elif categorization == "Good": prompt = random.choice(self.good_descriptions if is_own else self.opponent_good_descriptions)       
         elif categorization == "Inaccuracy": prompt = random.choice(self.inaccuracy_descriptions if is_own else self.opponent_inaccuracy_descriptions)
@@ -312,7 +312,7 @@ class Analyzer:
 
 
 
-        if categorization not in ["Best Move", "Forced", "Book"] and is_own:
+        if categorization not in ["Best", "Forced", "Book"] and is_own:
             missed_prompt = random.choice(self.missed_move)
             prompt += missed_prompt.format(best_move)
 
@@ -353,21 +353,26 @@ class Analyzer:
                 categorization = "Book" if is_book_move else self.categorize_move(position, total_moves)
                 description = self.generate_description(categorization, is_own, moves[0]['Move'], opening)
 
+                if not chess.Board(fen).is_checkmate():
+                    result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": categorization, "Description": description, "Accuracy": accuracy, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
 
-                result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": categorization, "Description": description, "Accuracy": accuracy, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
+                else:
+                    result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Best", "Description": "That's checkmate! Great game by both players.", "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen, "Opening": opening})
                 found_move = True
-
-
-        if not found_move:
-            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder", is_own, moves[0]['Move'], opening), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
 
         if chess.Board(fen).legal_moves.count() == 1:
             result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Forced", "Description":self.generate_description("Forced", is_own, moves[0]['Move'], opening), "Accuracy": 100, "Old FEN": fen,  "FEN": new_fen, "Opening": opening})
+
+        elif not found_move:
+            result.append({"Move": move['Move'], "Best Move": moves[0]['Move'], "Type": "Blunder", "Description":self.generate_description("Blunder", is_own, moves[0]['Move'], opening), "Accuracy": 0, "Old FEN": fen, "FEN": new_fen, "Opening": opening})
+
+
+
         return result
 
 
     def analyze(self):
-        results = [[{"own_color": self.own_color}], [{"Move": None, "Best Move": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', "Opening": None}]]
+        results = [[{"own_color": self.own_color}], [{"Move": None, "Best": None, "Type": None, "Description": None, "Accuracy": None, "Old FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  "FEN": 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', "Opening": None}]]
 
 
 
@@ -383,7 +388,7 @@ class Analyzer:
 
 
     def categorization_color(self, categorization):
-        if categorization == "Best Move": return (80, 199, 80) 
+        if categorization == "Best": return (80, 199, 80) 
         elif categorization == "Great": return (132, 209, 132) 
         elif categorization == "Good": return (158, 215, 158)
         elif categorization == "Inaccuracy": return (222, 222, 129)
@@ -391,6 +396,8 @@ class Analyzer:
         elif categorization == "Blunder": return (232, 112, 77)
         elif categorization == 'Book': return (166, 127, 89)
         elif categorization == 'Forced': return (131, 183, 235)
+
+        elif categorization == 'Accuracy': return (174, 92, 196)
 
 
 

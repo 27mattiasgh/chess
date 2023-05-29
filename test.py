@@ -1,23 +1,39 @@
-import pygame
-from pygame.locals import *
+import json
 
-# Initialize Pygame
-pygame.init()
-
-# Set up the display
-width, height = 800, 600
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Transparent Triangle")
+# Load the JSON data
+with open('assets/data/analyzer.json', 'r') as f:
+    data = json.load(f)
 
 
-triangle_points = [(400, 100), (200, 500), (600, 500)]
+white_move_types = {}
+black_move_types = {}
 
-background_color = (255, 255, 255) 
-triangle_color = (0, 255, 0, 20)  
+for index, move in enumerate(data[1:], start=1):
+    move_data = move[0]
+    move_type = move_data.get('Type')
+    if move_type:
+        if index % 2 == 1:
+            if move_type in black_move_types:
+                black_move_types[move_type] += 1
+            else:
+                black_move_types[move_type] = 1
+        else:
+            if move_type in white_move_types:
+                white_move_types[move_type] += 1
+            else:
+                white_move_types[move_type] = 1
 
 
-transparent_surface = pygame.Surface((width, height), pygame.SRCALPHA)
-pygame.draw.polygon(transparent_surface, triangle_color, triangle_points)
-screen.blit(transparent_surface, (0, 0))
 
+# Print black move types and their counts
+print("Black Move Classifications:")
+for move_type, count in black_move_types.items():
+    print(f"{count} {move_type}(s)")
 
+# Print a separator
+print("\n---\n")
+
+# Print white move types and their counts
+print("White Move Classifications:")
+for move_type, count in white_move_types.items():
+    print(f"{count} {move_type}(s)")

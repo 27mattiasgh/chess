@@ -7,8 +7,9 @@ import time
 import socket
 import netaddr
 import pygame
-
+import pygame.freetype
 import chess
+
 
 from src.chess.home import Home
 
@@ -27,6 +28,7 @@ from src.multiplayer.multiplayer import Multiplayer
 large_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 70)
 medium_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 30)
 small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 20)
+mini_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 10)
 
 grandmaster_fish = pygame.transform.scale(pygame.image.load(r'assets\images\fish.png'), (70, 70))
 
@@ -56,10 +58,6 @@ class Main:
         self.background = pygame.transform.scale(pygame.image.load(r'assets\images\background.png'), (1000, 750))
         pygame.display.set_caption('Chess')
 
-    
-
-
-
     def mode_computer(self):
         self.py_chess = chess.Board()  
 
@@ -67,10 +65,8 @@ class Main:
         self.game.own_color = 'black'
         self.game.current_color = 'white'
         self.logging.new(self.game.mode, self.game.own_color)
+        self.logging.log('computer', 'number')
         self.game.setup()
-
-
-
 
     def mode_puzzles(self, reset=False):
         
@@ -92,7 +88,7 @@ class Main:
         self.game.current_color = 'white' if active_color == 'w' else 'black'
         self.game.own_color = 'white' if self.game.current_color == 'black' else 'black' #set to opposite of current color
         self.game.puzzle_user_correct = None
-
+        self.logging.log('puzzles', 'number')
         self.game.setup(self.random_puzzle["FEN"])
 
 
@@ -184,6 +180,10 @@ class Main:
                                     time.sleep(1)
                                     make_computer_move()
 
+
+
+
+
         def make_computer_move():
             # Find all available legal moves
             available_moves = []
@@ -201,6 +201,7 @@ class Main:
         while analysis_thread.is_alive():
             handle_events()
             self.screen.blit(self.background, (0, 0))
+
             draw_grid()
             draw_symbols()
 
@@ -219,10 +220,8 @@ class Main:
         self.game.mode = 'analyzer'
         self.game.own_color = 'white'
         self.game.current_color = 'white'
+        self.logging.log('analysis', 'number')
         self.game.setup()
-
-
-
 
     def computer_process(self):
         best_move = self.computer.best_move(self.py_chess.fen())
@@ -257,13 +256,8 @@ class Main:
         self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
 
     def computer_puzzle_process(self): 
-
         move = self.moves[0]
         uci_format = chess.Move.from_uci(move)
-
-
-
-        
 
         self.moves.pop(0)
         initial_row, initial_col, final_row, final_col = self.game.uci_to_rowcol(move)
@@ -321,6 +315,7 @@ class Main:
 
         self.game.setup()
         self.multiplayer.host_setup()
+        self.logging.log('multiplayer', 'number')
 
     def multiplayer_user(self):
         self.py_chess = chess.Board() 
@@ -357,8 +352,14 @@ class Main:
                         if len(password) < 10:
                             password += str(event.key - pygame.K_0)
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if pygame.Rect(0, 0, SQUARE_SIZE, 25).collidepoint(event.pos):
+                        self.game.mode = None
+                        return
+
 
             self.screen.blit(self.background, (0, 0))
+            self.game.normal_ui(self.screen)
             password_text = password.replace("", " ")[1:-1] if password != 'Type Code Given:' else password
             password_rendered = large_font.render(password_text, True, (255, 255, 255))
             password_rect = password_rendered.get_rect()
@@ -377,6 +378,7 @@ class Main:
         pygame.display.update()
 
         self.game.setup()
+        self.logging.log('multiplayer', 'number')
         self.multiplayer.user_setup(getpass.getuser().split()[0], password)
 
     def showing(self):
@@ -396,6 +398,7 @@ class Main:
         self.game.puzzle_ui(self.screen)
         self.game.multiplayer_ui(self.screen)
 
+        self.game.normal_ui(self.screen)
 
     def mainloop(self):
         while True:
@@ -421,10 +424,6 @@ class Main:
 
                         elif pygame.Rect(760, 505, 209, 190).collidepoint(event.pos):
                             self.mode_analyzer()
-
-
-
-
 
 
                 pygame.display.flip()
@@ -699,19 +698,21 @@ class Main:
                             self.mode_puzzles(self.random_puzzle)
 
                         elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_user_correct:
-
-
+                            self.logging.log('puzzles', 'correct')
                             self.mode_puzzles()
 
                         elif pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'computer':
                             print('resign triggered')
 
                         elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
+                            self.logging.log('puzzles', 'incorrect')
                             threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                             game.puzzle_correct = False
                             time.sleep(0.85)
                             game.next_turn()
 
+                        elif pygame.Rect(0, 0, SQUARE_SIZE, 25).collidepoint(event.pos):
+                            game.mode = None
 
                     #quit
                     elif event.type == pygame.QUIT:
@@ -729,6 +730,7 @@ class Main:
                 self.game.show_moves(self.screen)
                 self.game.show_pieces(self.screen)
                 self.game.show_hover(self.screen)
+                self.game.normal_ui(self.screen)
 
                 game.own_color = moves[0][0]['own_color']
                 game.setup(moves[game.analysis_current_move + 1][0]['FEN']) 
@@ -767,7 +769,7 @@ class Main:
                     text_x = rectangle.centerx - rectangle_width // 2 + margin
                     text_y = rectangle.centery - text_height // 2 + margin - 10
 
-
+                    
                     transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
                     pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
                     screen.blit(transparent_surface, (rectangle_x, rectangle_y))
@@ -791,23 +793,79 @@ class Main:
                     grouper = small_font.render("Grouper", True, font_color)
                     screen.blit(grandmaster, (text_x + 73, rectangle_y+rectangle_height+30))
                     screen.blit(grouper, (text_x + 73, rectangle_y+rectangle_height+50))
-
-
+ 
                     current_categorization = moves[game.analysis_current_move + 1][0]['Type']
                     color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18).render(current_categorization, True, (255, 255, 255))
                     color_rect = pygame.draw.rect(screen, self.analyzer.categorization_color(current_categorization), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
                     color_surface_rect = color_surface.get_rect(center=color_rect.center)
                     screen.blit(color_surface, color_surface_rect)
 
-
                 else:
+                    WHITE = (255, 255, 255)
+                    BLACK = (20, 20, 20)
+                    white_move_types = {'Best': 0, 'Great': 0, 'Good': 0, 'Inaccuracy': 0, 'Mistake': 0, 'Blunder': 0, 'Book': 0, 'Forced': 0, 'Accuracy': 100}
+                    black_move_types = {'Best': 0, 'Great': 0, 'Good': 0, 'Inaccuracy': 0, 'Mistake': 0, 'Blunder': 0, 'Book': 0, 'Forced': 0, 'Accuracy': 100}
+                    total_white_accuracy = 0
+                    total_black_accuracy = 0
+                    white_move_count = 0
+                    black_move_count = 0
+
+                    for index, move in enumerate(moves[1:], start=1):
+                        move_data = move[0]
+                        move_type = move_data.get('Type')
+                        move_accuracy = move_data.get('Accuracy')
+
+                        if move_type:
+                            if index % 2 == 1:
+                                if move_type in black_move_types:
+                                    white_move_types[move_type] += 1
+                                    total_white_accuracy += move_accuracy
+                                    white_move_count += 1
+                            else:
+                                if move_type in white_move_types:
+                                    black_move_types[move_type] += 1
+                                    total_black_accuracy += move_accuracy
+                                    black_move_count += 1
 
 
-                    pass
+                    white_move_types['Accuracy'] =  str(round(total_white_accuracy / white_move_count if white_move_count > 0 else 0, 1))+'%'
+                    black_move_types['Accuracy'] = str(round(total_black_accuracy / black_move_count if black_move_count > 0 else 0, 1))+'%'
 
+                    table_x = WIDTH + 30
+                    table_y = (WINDOW_HEIGHT - HEIGHT) // 2 + 40
+                    table_width = (WINDOW_WIDTH-WIDTH) - 50
+                    table_height = HEIGHT - 175
 
+                    transparent_surface = pygame.Surface(((WINDOW_WIDTH - WIDTH) - 60, HEIGHT), pygame.SRCALPHA)
+                    pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, table_width, table_height), border_radius=10)
+                    screen.blit(transparent_surface, (table_x, table_y))
 
+                    header_x = table_x + 10
+                    header_y = table_y + 10
+                    font_surface = mini_font.render("Color", True, WHITE)
+                    screen.blit(font_surface, (header_x, header_y))
+                    font_surface = mini_font.render("Move Type", True, WHITE)
+                    screen.blit(font_surface, (header_x + 50, header_y))
+                    font_surface = mini_font.render("Count", True, WHITE)
+                    screen.blit(font_surface, (header_x + 170, header_y))
 
+                    row_x = table_x + 10
+                    row_y = header_y + 30
+                    row_spacing = 25
+
+                    other = 'black' if game.own_color == 'white' else 'white'
+                    own_color = WHITE if game.own_color == 'white' else BLACK
+                    other_color = BLACK if other == 'black' else WHITE
+
+                    for i, (color, move_types) in enumerate(zip(["You", other.title()], [white_move_types, black_move_types])):
+                        for j, (move_type, count) in enumerate(move_types.items()):
+                            font_surface = mini_font.render(color, True, own_color if color == 'You' else other_color)
+                            screen.blit(font_surface, (row_x, row_y + i * row_spacing))
+                            font_surface = mini_font.render(move_type, True, self.analyzer.categorization_color(move_type))
+                            screen.blit(font_surface, (row_x + 50, row_y + i * row_spacing))
+                            font_surface = mini_font.render(str(count), True, WHITE)
+                            screen.blit(font_surface, (row_x + 180, row_y + i * row_spacing))
+                            row_y += row_spacing  
 
                 transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
                 pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
@@ -819,7 +877,6 @@ class Main:
                 text_y = HEIGHT - 95 + (50 - text_rect.height) // 2
                 screen.blit(join_game_text, (text_x, text_y))
 
-
                 transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
                 pygame.draw.rect(transparent_surface, (0, 0, 0, 18), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
                 screen.blit(transparent_surface, (WIDTH + 30, HEIGHT - 35))
@@ -830,31 +887,22 @@ class Main:
                 text_y = HEIGHT - 35 + (50 - text_rect.height) // 2
                 screen.blit(join_game_text, (text_x, text_y))
 
-
-
-
-
-
-
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         sys.exit()
 
 
                     elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT and game.analysis_current_move  > 1:
+                        if event.key == pygame.K_LEFT and game.analysis_current_move  > 0:
                             game.analysis_current_move -= 1
                             game.highlighted_squares.clear()
- 
-                            
 
                         elif event.key == pygame.K_RIGHT and game.analysis_current_move + 1 < len(moves) - 1:
                             game.analysis_current_move += 1
                             game.highlighted_squares.clear()
 
                     elif event.type == pygame.MOUSEBUTTONUP:
-
-                        if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.analysis_current_move  > 1: #Reset
+                        if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.analysis_current_move  > 0: #Reset
                             game.analysis_current_move -= 1
                             game.highlighted_squares.clear()
 
@@ -862,9 +910,8 @@ class Main:
                                 game.analysis_current_move += 1
                                 game.highlighted_squares.clear()
 
-
-
-
+                        elif pygame.Rect(0, 0, SQUARE_SIZE, 25).collidepoint(event.pos):
+                            game.mode = None
 
             elif(game.mode == 'computer' and game.current_color != game.own_color):
 
@@ -891,10 +938,6 @@ class Main:
 
             pygame.display.update()
             if game.mode != 'analyser': self.showing()
-
-
-
-
 
 
 if __name__ == "__main__":

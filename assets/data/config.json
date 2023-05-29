@@ -1,10 +1,1 @@
-{
-    "multiplayer": {"played": 0, "won": 0, "lost": 0, "draw": 0},
-
-    "computer": {"played": 0,  "won": 0, "lost": 0, "draw": 0},
-
-    "puzzles": {"played": 0, "correct": 0, "incorrect": 0},
-
-    "analysis": {"analyzed": 0, "average_accuracy": 100}
-
-}
+{"multiplayer": {"number": 0, "won": 0, "lost": 0, "draw": 0}, "computer": {"number": 0, "won": 0, "lost": 0, "draw": 0}, "puzzles": {"number": 1, "correct": 0, "incorrect": 0}, "analysis": {"number": 0}}

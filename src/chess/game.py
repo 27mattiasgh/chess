@@ -7,7 +7,7 @@ from src.chess.dragger import Dragger
 import sys
 
 font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
-
+small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 9)
 
 
 class Game:
@@ -178,8 +178,6 @@ class Game:
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
 
-
-
     #Showing UI elements
     def analyzer_ui(self, surface):
         if self.mode != 'analyzer': return
@@ -196,9 +194,11 @@ class Game:
 
 
 
-
-
-
+    def normal_ui(self, surface):
+        resign_surface = small_font.render("Home", True, (255, 255, 255))
+        resign_rect = pygame.draw.rect(surface, (100, 100, 100), pygame.Rect(5, 5, SQUARE_SIZE-5, 15), border_radius=5)
+        resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
+        surface.blit(resign_surface, resign_surface_rect)
 
 
 

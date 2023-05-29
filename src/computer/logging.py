@@ -95,6 +95,19 @@ class Logging:
             json.dump(data, file)
 
 
+    def log(self, mode, update_type):
+        with open(self.config_path, 'r') as file: data = json.load(file)
+        data[mode][update_type] += 1
+        with open(self.config_path, 'w') as file: json.dump(data, file)
+
+
+
+
+
+
+
+
+
 
     def add(self, old_fen, new_fen, move):
         '''
