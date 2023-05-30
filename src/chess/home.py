@@ -1,5 +1,6 @@
 
 import re
+import json
 import pygame
 import getpass
 import datetime
@@ -44,6 +45,13 @@ class Home:
         surface.blit(github, (WINDOW_WIDTH - github.get_width() - 3, WINDOW_HEIGHT- 10))
 
 
+        with open('assets\data\config.json', 'r') as file: data = json.load(file)
+
+
+
+
+
+
 
 
 
@@ -77,6 +85,8 @@ class Home:
 
         reset_surface = large_font.render(f"Online", True, (255, 255, 255))
         surface.blit(reset_surface, (30, 240))
+
+
 
 
 
