@@ -1,13 +1,28 @@
-import json
+import re
+import random
 import pygame
 import pygame.freetype
 
 from src.chess.const import *
+from src.chess.prompts import *
+
 from src.chess.dragger import Dragger
 import sys
 
 font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
 small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 9)
+
+beginner_fish = pygame.transform.scale(pygame.image.load(r'assets\images\beginner_blobfish.jpg'), (100, 100))
+intermediate_fish = pygame.transform.scale(pygame.image.load(r'assets\images\intermediate_icefish.jpg'), (100, 100))
+advanced_fish = pygame.transform.scale(pygame.image.load(r'assets\images\advanced_arowana.png'), (100, 100))
+grandmaster_fish = pygame.transform.scale(pygame.image.load(r'assets\images\grandmaster_grouper.png'), (100, 100))
+
+
+
+beginner_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\beginner_blobfish.jpg'), (70, 70))
+intermediate_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\intermediate_icefish.jpg'), (70, 70))
+advanced_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\advanced_arowana.png'), (70, 70))
+grandmaster_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\grandmaster_grouper.png'), (70, 70))
 
 
 class Game:
@@ -22,12 +37,13 @@ class Game:
         self.current_color = None
 
 
-
+        self.computer_character = None
+        self.computer_prompt = None
 
 
 
         self.puzzle_correct = True
-        self.puzzle_user_correct = None
+        self.puzzle_complete = None
 
         self.analysis_current_move = 0
         self.analysis_last_move_found = False
@@ -137,7 +153,7 @@ class Game:
                 color = '#C86464' if (square[0] + square[1]) % 2 == 0 else '#C15151'
             if square[2] == 'premove':
                 color = '#72bdda' if (square[0] + square[1]) % 2 == 0 else '#5aabc1'
-            if square[2] == 'puzzle_user_correct':
+            if square[2] == 'puzzle_correct':
                 color = '#92ae79' if (square[0] + square[1]) % 2 == 0 else '#a0b88a'
             if square[2] == 'puzzle_incorrect':
                 color = '#ff8a80' if (square[0] + square[1]) % 2 == 0 else '#ff7f7f'
@@ -168,31 +184,69 @@ class Game:
         resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
         surface.blit(resign_surface, resign_surface_rect)
 
-        try:
-            with open('assets\data\games.json') as json_file: data = json.load(json_file)
-            latest_opening = data[str(len(data))]['moves'][-1]['opening']
-        except: latest_opening = 'None'
 
-        color_surface = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18).render(f"{latest_opening}", True, (255, 255, 255))
-        color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.own_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
+        margin = 10
+        rectangle_width = (WINDOW_WIDTH-WIDTH) - 60
+        rectangle_x = WIDTH + 30
+
+        font_color = (255, 255, 255)
+        text = self.computer_prompt
+
+
+
+        if text is not None:
+            words = text.split()
+            lines = []
+            current_line = words[0]
+            for word in words[1:]:
+                if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin: 
+                    current_line += ' ' + word
+                else:
+                    lines.append(current_line)
+                    current_line = word
+            lines.append(current_line)
+            line_height = font.size(lines[0])[1]
+            text_height = len(lines) * line_height
+            rectangle_height = text_height + 2 * margin + 5
+            rectangle_y = 115
+            rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+            text_x = rectangle.centerx - rectangle_width // 2 + margin
+            text_y = rectangle.centery - text_height // 2 + margin - 10
+
+            
+            transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
+            pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
+            surface.blit(transparent_surface, (rectangle_x, rectangle_y))
+
+
+            for line in lines:
+                rendered_text = font.render(line, True, font_color)
+                surface.blit(rendered_text, (text_x, text_y))
+                text_y += line_height
+
+
+
+            triangle_points = [(rectangle_x + 200, rectangle_y + rectangle_height), (rectangle_x + 230, rectangle_y + rectangle_height), (rectangle_x + 215, rectangle_y + rectangle_height + 15)]
+            transparent_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+            pygame.draw.polygon(transparent_surface, (255, 255, 255, 25), triangle_points)
+            surface.blit(transparent_surface, (0, 0))
+
+            data = {'Beginner Blobfish': beginner_fish_small, 'Intermediate Icefish': intermediate_fish_small, 'Advanced Arowana': advanced_fish_small, 'Grandmaster Grouper': grandmaster_fish_small}
+
+            surface.blit(data[self.computer_character], (rectangle_x, rectangle_y+rectangle_height+20))
+
+            charater = self.computer_character.split()
+
+            level = font.render(charater[0], True, font_color)
+            fish = font.render(charater[1], True, font_color)
+            surface.blit(level, (text_x + 73, rectangle_y+rectangle_height+30))
+            surface.blit(fish, (text_x + 73, rectangle_y+rectangle_height+50))
+
+
+        color_surface = font.render("Your Move" if self.own_color == self.current_color else "Computer Move", True, (73, 72, 71) if self.current_color == 'white' else (241, 241, 241))
+        color_rect = pygame.draw.rect(surface, (241, 241, 241) if self.current_color == 'white' else (73, 72, 71), pygame.Rect(WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2, (WINDOW_WIDTH-WIDTH) - 30, 80), border_top_left_radius=10, border_top_right_radius=10) #Color Turn
         color_surface_rect = color_surface.get_rect(center=color_rect.center)
         surface.blit(color_surface, color_surface_rect)
-
-    #Showing UI elements
-    def analyzer_ui(self, surface):
-        if self.mode != 'analyzer': return
-
-        
-        transparent_surface = pygame.Surface(((WINDOW_WIDTH-WIDTH) - 30, HEIGHT), pygame.SRCALPHA)
-        pygame.draw.rect(transparent_surface, (255, 255, 255, 40), pygame.Rect(0, 0, (WINDOW_WIDTH-WIDTH) - 30, HEIGHT), border_radius=10)
-        surface.blit(transparent_surface, (WIDTH + 15, (WINDOW_HEIGHT - HEIGHT)//2))
-
-        resign_surface = font.render("Resign", True, (255, 255, 255))
-        resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
-        resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
-        surface.blit(resign_surface, resign_surface_rect)
-
-
 
     def normal_ui(self, surface):
         resign_surface = small_font.render("Home", True, (255, 255, 255))
@@ -201,9 +255,10 @@ class Game:
         surface.blit(resign_surface, resign_surface_rect)
 
 
+        github = small_font.render(f"github.com/hyperrrrrrr/chess", True, (255, 255, 255))
 
 
-
+        surface.blit(github, (WINDOW_WIDTH - github.get_width() - 3, WINDOW_HEIGHT- 10))
 
     def multiplayer_ui(self, surface):
         if self.mode != 'multiplayer': return
@@ -220,7 +275,6 @@ class Game:
         resign_rect = pygame.draw.rect(surface, (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
         resign_surface_rect = resign_surface.get_rect(center=resign_rect.center)
         surface.blit(resign_surface, resign_surface_rect)
-
 
 
     def puzzle_ui(self, surface):
@@ -246,11 +300,123 @@ class Game:
         reset_surface_rect = reset_surface.get_rect(center=reset_rect.center)
         surface.blit(reset_surface, reset_surface_rect)
 
-        if self.puzzle_user_correct:
+
+
+        if self.puzzle_complete:
             cont_surface = font.render("Next", True, (255, 255, 255))
-            cont_rect = pygame.draw.rect(surface, (127, 166, 80), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
+            cont_rect = pygame.draw.rect(surface, (127, 166, 80) if self.puzzle_correct else (255, 84, 86), pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50), border_radius=10)
             cont_surface_rect = cont_surface.get_rect(center=cont_rect.center)
             surface.blit(cont_surface, cont_surface_rect)
+
+            margin = 10
+            rectangle_width = (WINDOW_WIDTH-WIDTH) - 60
+            rectangle_x = WIDTH + 30
+
+            font_color = (255, 255, 255)
+
+            text = 'Nice Job!' if self.puzzle_correct else 'Nice try.'
+            text += f" This puzzle has been played {self.computer_prompt['NbPlays']} times by various players with a ELO rating of {self.computer_prompt['Rating']}."
+
+            if text is not None:
+                words = text.split()
+                lines = []
+                current_line = words[0]
+                for word in words[1:]:
+                    if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin: 
+                        current_line += ' ' + word
+                    else:
+                        lines.append(current_line)
+                        current_line = word
+                lines.append(current_line)
+                line_height = font.size(lines[0])[1]
+                text_height = len(lines) * line_height
+                rectangle_height = text_height + 2 * margin + 5
+                rectangle_y = 115
+                rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+                text_x = rectangle.centerx - rectangle_width // 2 + margin
+                text_y = rectangle.centery - text_height // 2 + margin - 10
+
+                
+                transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
+                surface.blit(transparent_surface, (rectangle_x, rectangle_y))
+
+
+                for line in lines:
+                    rendered_text = font.render(line, True, font_color)
+                    surface.blit(rendered_text, (text_x, text_y))
+                    text_y += line_height
+
+
+
+                triangle_points = [(rectangle_x + 200, rectangle_y + rectangle_height), (rectangle_x + 230, rectangle_y + rectangle_height), (rectangle_x + 215, rectangle_y + rectangle_height + 15)]
+                transparent_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+                pygame.draw.polygon(transparent_surface, (255, 255, 255, 25), triangle_points)
+                surface.blit(transparent_surface, (0, 0))
+
+
+
+                surface.blit(grandmaster_fish_small, (rectangle_x, rectangle_y+rectangle_height+20))
+
+
+                level = font.render('Grandmaster', True, font_color)
+                fish = font.render('Grouper', True, font_color)
+                surface.blit(level, (text_x + 73, rectangle_y+rectangle_height+30))
+                surface.blit(fish, (text_x + 73, rectangle_y+rectangle_height+50))
+
+
+        else:
+            margin = 10
+            rectangle_width = (WINDOW_WIDTH-WIDTH) - 60
+            rectangle_x = WIDTH + 30
+
+            font_color = (255, 255, 255)
+
+            text = f"You think you can solve this puzzle with a {self.computer_prompt['Rating']} rating?"
+
+            if text is not None:
+                words = text.split()
+                lines = []
+                current_line = words[0]
+                for word in words[1:]:
+                    if font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin: 
+                        current_line += ' ' + word
+                    else:
+                        lines.append(current_line)
+                        current_line = word
+                lines.append(current_line)
+                line_height = font.size(lines[0])[1]
+                text_height = len(lines) * line_height
+                rectangle_height = text_height + 2 * margin + 5
+                rectangle_y = 115
+                rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+                text_x = rectangle.centerx - rectangle_width // 2 + margin
+                text_y = rectangle.centery - text_height // 2 + margin - 10
+
+                transparent_surface = pygame.Surface((rectangle_width, rectangle_height), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (255, 255, 255, 25), pygame.Rect(0, 0, rectangle_width, rectangle_height), border_radius=10)
+                surface.blit(transparent_surface, (rectangle_x, rectangle_y))
+
+                for line in lines:
+                    rendered_text = font.render(line, True, font_color)
+                    surface.blit(rendered_text, (text_x, text_y))
+                    text_y += line_height
+
+
+                triangle_points = [(rectangle_x + 200, rectangle_y + rectangle_height), (rectangle_x + 230, rectangle_y + rectangle_height), (rectangle_x + 215, rectangle_y + rectangle_height + 15)]
+                transparent_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
+                pygame.draw.polygon(transparent_surface, (255, 255, 255, 25), triangle_points)
+                surface.blit(transparent_surface, (0, 0))
+
+                surface.blit(grandmaster_fish_small, (rectangle_x, rectangle_y+rectangle_height+20))
+
+                level = font.render('Grandmaster', True, font_color)
+                fish = font.render('Grouper', True, font_color)
+                surface.blit(level, (text_x + 73, rectangle_y+rectangle_height+30))
+                surface.blit(fish, (text_x + 73, rectangle_y+rectangle_height+50))
+
+
+
 
     
 
@@ -263,9 +429,63 @@ class Game:
     def next_turn(self):
         self.current_color = 'white' if self.current_color == 'black' else 'black'
 
+    def update_prompt(self, check, checkmate, player):
+        if check:
+
+            if player == 'human':
+                if self.computer_character == 'Beginner Blobfish':
+                    self.computer_prompt = random.choice(beginner_check_responses)
+                elif self.computer_character == 'Intermediate Icefish':
+                    self.computer_prompt = random.choice(intermediate_check_responses)
+                elif self.computer_character == 'Advanced Arowana':
+                    self.computer_prompt = random.choice(advanced_check_responses)
+                elif self.computer_character == 'Grandmaster Grouper':
+                    self.computer_prompt = random.choice(grandmaster_check_responses)
+
+            else:
+                if self.computer_character == 'Beginner Blobfish':
+                    self.computer_prompt = random.choice(beginner_check_prompts)
+                elif self.computer_character == 'Intermediate Icefish':
+                    self.computer_prompt = random.choice(intermediate_check_prompts)
+                elif self.computer_character == 'Advanced Arowana':
+                    self.computer_prompt = random.choice(advanced_check_prompts)
+                elif self.computer_character == 'Grandmaster Grouper':
+                    self.computer_prompt = random.choice(grandmaster_check_prompts)
+
+
+        if checkmate:
+
+            if player == 'human':
+                if self.computer_character == 'Beginner Blobfish':
+                    self.computer_prompt = random.choice(beginner_checkmate_responses)
+                elif self.computer_character == 'Intermediate Icefish':
+                    self.computer_prompt = random.choice(intermediate_checkmate_responses)
+                elif self.computer_character == 'Advanced Arowana':
+                    self.computer_prompt = random.choice(advanced_checkmate_responses)
+                elif self.computer_character == 'Grandmaster Grouper':
+                    self.computer_prompt = random.choice(grandmaster_checkmate_responses)
+            else:
+                if self.computer_character == 'Beginner Blobfish':
+                    self.computer_prompt = random.choice(beginner_checkmate_prompts)
+                elif self.computer_character == 'Intermediate Icefish':
+                    self.computer_prompt = random.choice(intermediate_checkmate_prompts)
+                elif self.computer_character == 'Advanced Arowana':
+                    self.computer_prompt = random.choice(advanced_checkmate_prompts)
+                elif self.computer_character == 'Grandmaster Grouper':
+                    self.computer_prompt = random.choice(grandmaster_checkmate_prompts)
 
 
 
+        else:
+            if player == 'human':
+                if self.computer_character == 'Beginner Blobfish':
+                    self.computer_prompt = random.choice(beginner_responses)
+                elif self.computer_character == 'Intermediate Icefish':
+                    self.computer_prompt = random.choice(intermediate_responses)
+                elif self.computer_character == 'Advanced Arowana':
+                    self.computer_prompt = random.choice(advanced_responses)
+                elif self.computer_character == 'Grandmaster Grouper':
+                    self.computer_prompt = random.choice(grandmaster_responses)
 
     def set_hover(self, row, col):
         """

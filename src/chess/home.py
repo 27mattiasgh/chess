@@ -9,6 +9,8 @@ pygame.init()
 mega_font  = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 70)
 large_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 40)
 medium_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 18)
+small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 8)
+
 
 class Home:
     def __init__(self):
@@ -33,6 +35,13 @@ class Home:
         surface.blit(transparent_surface, (15, 15))
 
 
+        #Mattias Halloran CS8 '27 
+
+        name = small_font.render(f"Mattias Halloran CS8 '27", True, (255, 255, 255))
+        github = small_font.render(f"github.com/hyperrrrrrr/chess", True, (255, 255, 255))
+
+        surface.blit(name, (3, WINDOW_HEIGHT- 10))
+        surface.blit(github, (WINDOW_WIDTH - github.get_width() - 3, WINDOW_HEIGHT- 10))
 
 
 

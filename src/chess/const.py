@@ -14,7 +14,7 @@ SQUARE_SIZE = (WIDTH // COLS)
 
 
 #engine settings
-FIND_TIME = 650 #milliseconds
+FIND_TIME = 850 #milliseconds
 THREADS = 4 # < number of logical processors
 HASH = 1024 #amount of allowed memory stockfish can use 
 

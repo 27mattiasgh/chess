@@ -14,10 +14,12 @@ import chess
 from src.chess.home import Home
 
 from src.chess.const import *
+from src.chess.prompts import *
 from src.chess.game import Game
 from src.chess.move import Move
 from src.chess.sound import Sound
 from src.chess.square import Square
+
 
 from src.computer.analyzer import Analyzer
 from src.computer.logging import Logging
@@ -30,7 +32,30 @@ medium_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 30)
 small_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 20)
 mini_font = pygame.font.Font(r"assets\fonts\HelveticaNeueBold.ttf", 10)
 
-grandmaster_fish = pygame.transform.scale(pygame.image.load(r'assets\images\fish.png'), (70, 70))
+
+
+beginner_fish = pygame.transform.scale(pygame.image.load(r'assets\images\beginner_blobfish.jpg'), (100, 100))
+intermediate_fish = pygame.transform.scale(pygame.image.load(r'assets\images\intermediate_icefish.jpg'), (100, 100))
+advanced_fish = pygame.transform.scale(pygame.image.load(r'assets\images\advanced_arowana.png'), (100, 100))
+grandmaster_fish = pygame.transform.scale(pygame.image.load(r'assets\images\grandmaster_grouper.png'), (100, 100))
+
+
+
+beginner_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\beginner_blobfish.jpg'), (70, 70))
+intermediate_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\intermediate_icefish.jpg'), (70, 70))
+advanced_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\advanced_arowana.png'), (70, 70))
+grandmaster_fish_small = pygame.transform.scale(pygame.image.load(r'assets\images\grandmaster_grouper.png'), (70, 70))
+
+
+whiteboard = pygame.transform.scale(pygame.image.load(r'assets\images\blackboard.png'), (550, 550))
+blackboard = pygame.transform.scale(pygame.image.load(r'assets\images\whiteboard.png'), (550, 550))
+
+
+
+
+
+
+
 
 class Main:
     def __init__(self):
@@ -59,27 +84,167 @@ class Main:
         pygame.display.set_caption('Chess')
 
     def mode_computer(self):
-        self.py_chess = chess.Board()  
+        done = False
+        self.game.own_color = 'white'
+        self.game.computer_character = 'Beginner Blobfish'
+        self.game.computer_prompt =  'Greetings, fellow chess enthusiast! I am Beginner Blobfish, a fish of humble beginnings in the vast ocean of strategic battles. Together, let us explore the depths of unconventional tactics and embark on a journey of learning and growth!'
 
+        while not done:
+            self.screen.blit(self.background, (0, 0))
+
+            if self.game.own_color == 'black':
+                self.screen.blit(whiteboard, (15, 15))
+            else:
+                self.screen.blit(blackboard, (15, 15))
+
+
+
+            box_x = 15
+            box_y = 15 + whiteboard.get_height() + 15 
+            box_width = whiteboard.get_width()
+            box_height = 75
+
+            opposite = 'black' if self.game.own_color == 'white' else 'white'
+
+            transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
+            pygame.draw.rect(transparent_surface, (255, 255, 255, 18) if opposite == 'white' else (0, 0, 0, 18), pygame.Rect(0, 0, box_width, box_height), border_radius=10) #Last two args are width height
+            self.screen.blit(transparent_surface, (box_x, box_y)) #Args are x position and y position
+
+            join_game_text = small_font.render(f'Play As {opposite.title()}', True, (255, 255, 255))
+            text_rect = join_game_text.get_rect()
+            text_x = box_x + (box_width - text_rect.width) // 2 
+            text_y = box_y + (box_height - text_rect.height) // 2
+            self.screen.blit(join_game_text, (text_x, text_y))
+
+
+            box_2_x = 15
+            box_2_y = whiteboard.get_height() + 40 + box_height
+            box_2_width = whiteboard.get_width()
+            box_2_height = 75
+
+            transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
+            pygame.draw.rect(transparent_surface, (99, 219, 129, 90), pygame.Rect(0, 0, box_2_width, box_2_height), border_radius=10) #Last two args are width height
+            self.screen.blit(transparent_surface, (box_2_x, box_2_y))
+
+            join_game_text = small_font.render('Start', True, (255, 255, 255))
+            text_rect = join_game_text.get_rect()
+            text_x = box_2_x + (box_2_width - text_rect.width) // 2 
+            text_y = box_2_y + (box_2_height - text_rect.height) // 2
+            self.screen.blit(join_game_text, (text_x, text_y))
+
+
+            options = ['Beginner Blobfish', 'Intermediate Icefish', 'Advanced Arowana', 'Grandmaster Grouper']
+            image_options = [beginner_fish, intermediate_fish, advanced_fish, grandmaster_fish]
+            description_options = ['This chess enthusiast is just getting started and knows as much about strategy as a fish knows about riding a bicycle. Can you withstand the depths of their unconventional tactics and emerge victorious against the Blobfish blitz?',
+                                   'This frosty player has honed their skills to a chilling level, freezing opponents with unexpected moves and icy stares. Can you thaw their strategic frost and claim victory?', 
+                                   'Like a swift and agile fish navigating the currents, this chess master swims through the game with calculated precision and graceful strategy. Can you outmaneuver this formidable fish and secure a triumphant checkmate?', 
+                                   'The ultimate apex predator of chess, this wise and formidable player strikes fear into the hearts of opponents, leaving them floundering in the depths of defeat. Can you emerge victorious against this legendary underwater tactician, whose strategic brilliance will leave you gasping for breath?'] 
+
+
+            for i in range(4):
+                x = whiteboard.get_width() + 30
+                y = 169*i + 15*(i+1) if i>0 else 15
+                width = WINDOW_WIDTH - whiteboard.get_width() - 45
+                height = 169
+
+                transparent_surface = pygame.Surface((1000, 750), pygame.SRCALPHA)
+                pygame.draw.rect(transparent_surface, (0, 0, 0, 25) if self.game.computer_character == options[i] else (255, 255, 255, 20), pygame.Rect(0, 0, width, height), border_radius=10) #Last two args are width height
+                self.screen.blit(transparent_surface, (x, y))
+
+                join_game_text = small_font.render(options[i], True, (255, 255, 255))
+                text_rect = join_game_text.get_rect()
+                text_x = x + (width - text_rect.width) // 2 
+                text_y = y + 5
+                self.screen.blit(join_game_text, (text_x, text_y))
+                self.screen.blit(image_options[i], (x+15, y+34))
+
+
+
+                rectangle_x = x + 125
+                rectangle_y = y+40
+                rectangle_width = width + 110
+                rectangle_height = height - text_rect.width - 5
+
+                margin = 1
+
+                words = description_options[i].split()
+                lines = []
+                current_line = words[0]
+                for word in words[1:]:
+                    if small_font.size(current_line + ' ' + word)[0] <= rectangle_width - 2 * margin: 
+                        current_line += ' ' + word
+                    else:
+                        lines.append(current_line)
+                        current_line = word
+
+                lines.append(current_line)
+                line_height = small_font.size(lines[0])[1]
+                text_height = len(lines) * line_height
+                rectangle_height = text_height + 2 * margin + 5
+                rectangle = pygame.Rect(rectangle_x, rectangle_y, rectangle_width, rectangle_height)
+                text_x = rectangle.centerx - rectangle_width // 2 + margin
+                text_y = rectangle.centery - text_height // 2 + margin - 10
+
+                for line in lines:
+                    rendered_text = mini_font.render(line, True, (255, 255, 255))
+                    self.screen.blit(rendered_text, (text_x, text_y))
+                    text_y += line_height
+
+
+
+
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if pygame.Rect(box_x, box_y, box_width, box_height).collidepoint(event.pos):
+                        self.game.own_color = opposite
+                        
+
+                    elif pygame.Rect(box_2_x, box_2_y, box_2_width, box_2_height).collidepoint(event.pos): 
+                            done = True
+
+                    elif pygame.Rect(whiteboard.get_width() + 30, 15, WINDOW_WIDTH - whiteboard.get_width() - 45, 169).collidepoint(event.pos): 
+                            self.game.computer_character = 'Beginner Blobfish'
+                            self.game.computer_prompt =  'Greetings, fellow chess enthusiast! I am Beginner Blobfish, a fish of humble beginnings in the vast ocean of strategic battles. Together, let us explore the depths of unconventional tactics and embark on a journey of learning and growth!'
+
+                    elif pygame.Rect(whiteboard.get_width() + 30, 199, WINDOW_WIDTH - whiteboard.get_width() - 45, 169).collidepoint(event.pos): 
+                            self.game.computer_character = 'Intermediate Icefish'
+                            self.game.computer_prompt =  "Ahoy, fellow chess adventurers! I am the Intermediate Icefish, a frosty player who has honed my skills to a chilling level. Prepare to witness unexpected moves and feel the icy stare of my strategic prowess. Brace yourselves for a thrilling battle on the frozen chessboard!"
+
+                    elif pygame.Rect(whiteboard.get_width() + 30, 383, WINDOW_WIDTH - whiteboard.get_width() - 45, 169).collidepoint(event.pos): 
+                            self.game.computer_character = 'Advanced Arowana'
+                            self.game.computer_prompt = "Welcome, challengers, to the realm of the Advanced Arowana! Like a swift and agile fish navigating the currents, I gracefully swim through the game with calculated precision. Prepare to witness a symphony of strategic brilliance as we engage in a dance of wit and cunning on the chessboard!"
+
+                    elif pygame.Rect(whiteboard.get_width() + 30, 567, WINDOW_WIDTH - whiteboard.get_width() - 45, 169).collidepoint(event.pos): 
+                            self.game.computer_character = 'Grandmaster Grouper'
+                            self.game.computer_prompt = "Bow down, mere mortals, before the mighty Grandmaster Grouper, the ultimate apex predator of chess! I strike fear into the hearts of opponents, leaving them floundering in the depths of defeat. Dare you challenge my legendary underwater tactician skills? Prepare to gasp for breath as you face the true might of chess mastery!"
+
+            pygame.display.update()
+
+
+        self.py_chess = chess.Board()  
         self.game.mode = 'computer'
-        self.game.own_color = 'black'
+
+
         self.game.current_color = 'white'
         self.logging.new(self.game.mode, self.game.own_color)
         self.logging.log('computer', 'number')
+        self.computer.update_engine_strength(self.game.computer_character)
         self.game.setup()
 
+
     def mode_puzzles(self, reset=False):
-        
         self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
 
         while int(self.random_puzzle['Rating']) < 1000: 
             self.random_puzzle = random.choice(self.puzzle_data) if not reset else reset.copy()
 
-
         self.moves = list(self.random_puzzle["Moves"])
         print(self.moves, self.random_puzzle["Rating"])
-
-        
+    
         self.game.highlighted_squares.clear()
         self.py_chess = chess.Board(fen=self.random_puzzle["FEN"])  
         ranks, active_color, castling, en_passant, halfmove_clock, fullmove_number = self.random_puzzle["FEN"].split()
@@ -87,18 +252,19 @@ class Main:
         self.game.mode = 'puzzles'
         self.game.current_color = 'white' if active_color == 'w' else 'black'
         self.game.own_color = 'white' if self.game.current_color == 'black' else 'black' #set to opposite of current color
-        self.game.puzzle_user_correct = None
+
+        self.game.puzzle_correct = True
+        self.game.puzzle_complete = False
+
         self.logging.log('puzzles', 'number')
         self.game.setup(self.random_puzzle["FEN"])
-
+        self.game.computer_prompt = self.random_puzzle
 
 
     def mode_analyzer(self):
         self.analyzer.load_data()
         analysis_thread = threading.Thread(target=self.analyzer.analyze)
-
         analysis_thread.start()
-
 
 
         # Adjust Tic-Tac-Toe board size and position
@@ -213,8 +379,6 @@ class Main:
             self.screen.blit(join_game_text, text_rect)
             pygame.display.update()
 
-
-
         self.py_chess = chess.Board()  
 
         self.game.mode = 'analyzer'
@@ -253,6 +417,12 @@ class Main:
 
         self.py_chess.push(uci_format)
         self.logging.add(old_fen, self.py_chess.fen(), best_move)
+
+        check = self.py_chess.is_check()
+        checkmate = self.py_chess.is_checkmate()
+        self.game.update_prompt(check, checkmate, 'computer')
+        
+
         self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='lost' if self.py_chess.is_checkmate() else None)
 
     def computer_puzzle_process(self): 
@@ -281,7 +451,7 @@ class Main:
         self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate=None)
         self.game.highlighted_squares.clear()
 
-        self.game.puzzle_user_correct = None  
+
 
     def incorrect_puzzle(self, piece, initial_row, initial_col, released_row, released_col):
         initial = Square(initial_row, initial_col)
@@ -628,11 +798,21 @@ class Main:
                                 dragger.undrag_piece()
 
 
+
                                 py_chess.push(uci_format)
+
+                                check = self.py_chess.is_check()
+                                checkmate = self.py_chess.is_checkmate()
+
+                                game.update_prompt(check, checkmate, 'human')
+
+
                                 threading.Thread(name='logging Add Thread', target=logging.add, args=(old_fen, py_chess.fen(), move)).start()
-                                self.sound.play(check=self.py_chess.is_check(), capture=is_capture, mate='won' if self.py_chess.is_checkmate() else None)
+                                self.sound.play(check=check, capture=is_capture, mate='won' if checkmate else None)
                                 self.showing()
                                 game.next_turn() 
+
+
 
                             elif(board.valid_move(dragger.piece, move) and game.mode == 'multiplayer'): 
                                 board.move(dragger.piece, move, py_chess.fen())
@@ -670,8 +850,8 @@ class Main:
                                     move = game.rowcol_to_uci(dragger.initial_row, dragger.initial_col, released_row, released_col)
 
                                     
-                                    game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_user_correct')
-                                    game.add_highlight(released_row, released_col, 'puzzle_user_correct')
+                                    game.add_highlight(dragger.initial_row, dragger.initial_col, 'puzzle_correct')
+                                    game.add_highlight(released_row, released_col, 'puzzle_correct')
 
                                     dragger.undrag_piece()
 
@@ -689,7 +869,7 @@ class Main:
                                     t = threading.Thread(name='Puzzle Incorrect Thread', target=self.incorrect_puzzle, args=(dragger.piece, dragger.initial_row, dragger.initial_col, released_row, released_col))
                                     t.start()
                                     dragger.undrag_piece()
-                                    game.puzzle_user_correct = False    
+                                    game.puzzle_correct = False    
 
                             
 
@@ -697,7 +877,7 @@ class Main:
                         if pygame.Rect(WIDTH + 30, HEIGHT - 35, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.mode == 'puzzles':
                             self.mode_puzzles(self.random_puzzle)
 
-                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_user_correct:
+                        elif pygame.Rect(WIDTH + 30, HEIGHT - 95, (WINDOW_WIDTH-WIDTH) - 60, 50).collidepoint(event.pos) and game.puzzle_complete:
                             self.logging.log('puzzles', 'correct')
                             self.mode_puzzles()
 
@@ -710,6 +890,7 @@ class Main:
                             game.puzzle_correct = False
                             time.sleep(0.85)
                             game.next_turn()
+
 
                         elif pygame.Rect(0, 0, SQUARE_SIZE, 25).collidepoint(event.pos):
                             game.mode = None
@@ -787,7 +968,7 @@ class Main:
                     pygame.draw.polygon(transparent_surface, (255, 255, 255, 25), triangle_points)
                     screen.blit(transparent_surface, (0, 0))
 
-                    screen.blit(grandmaster_fish, (rectangle_x, rectangle_y+rectangle_height+20))
+                    screen.blit(grandmaster_fish_small, (rectangle_x, rectangle_y+rectangle_height+20))
 
                     grandmaster = small_font.render("Grandmaster", True, font_color)
                     grouper = small_font.render("Grouper", True, font_color)
@@ -920,6 +1101,9 @@ class Main:
                         time.sleep(0.05)
 
                     threading.Thread(name='Computer Process', target=self.computer_process).start()
+                    
+
+                    
                     game.next_turn() 
                     self.showing()
 
@@ -930,7 +1114,7 @@ class Main:
 
             elif (game.mode == 'puzzles' and game.current_color != game.own_color): #PUZZLE COMPUTER MOVING
                 if len(self.moves) == 0:
-                    game.puzzle_user_correct = True
+                    game.puzzle_complete = True
                 else:
                     threading.Thread(name='Puzzle Computer Process Thread', target=self.computer_puzzle_process).start()  
                 game.next_turn()
